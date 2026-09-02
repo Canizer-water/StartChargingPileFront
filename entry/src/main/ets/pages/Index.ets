@@ -1,11 +1,14 @@
-import { NavParam } from '../model/Types';
+import { HomeView } from '../view/HomeView';
 import { NearbyStationsPage } from '../view/NearbyStationsPage';
-import { StationDetailPage } from '../view/station/StationDetailPage';
-import { PileDetailPage } from '../view/station/PileDetailPage';
+import { WalletView } from '../view/WalletView';
+import { MyVehiclesView } from '../view/MyVehiclesView';
+import { OrderHistoryView } from '../view/OrderHistoryView';
+import { RechargeView } from '../view/RechargeView';
+import { InvoiceView } from '../view/InvoiceView';
 
 /**
  * 主框架（Navigation 宿主）。
- * 以「附近电站」为根内容，通过 NavPathStack 跳转二级、三级页面。
+ * 根内容为首页 HomeView，各二级页通过 NavPathStack 跳转。
  */
 
 @Entry
@@ -15,16 +18,24 @@ struct Index {
 
   @Builder
   PageMap(name: string, param: object) {
-    if (name === 'StationDetail') {
-      StationDetailPage({ pathStack: this.pathStack, stationId: (param as NavParam).id })
-    } else if (name === 'PileDetail') {
-      PileDetailPage({ pathStack: this.pathStack, pileId: (param as NavParam).id })
+    if (name === 'NearbyStations') {
+      NearbyStationsPage({ pathStack: this.pathStack })
+    } else if (name === 'Wallet') {
+      WalletView({ pathStack: this.pathStack })
+    } else if (name === 'MyVehicles') {
+      MyVehiclesView({ pathStack: this.pathStack })
+    } else if (name === 'OrderHistory') {
+      OrderHistoryView({ pathStack: this.pathStack })
+    } else if (name === 'Recharge') {
+      RechargeView({ pathStack: this.pathStack })
+    } else if (name === 'Invoice') {
+      InvoiceView({ pathStack: this.pathStack })
     }
   }
 
   build() {
     Navigation(this.pathStack) {
-      NearbyStationsPage({ pathStack: this.pathStack })
+      HomeView({ pathStack: this.pathStack })
     }
     .hideTitleBar(true)
     .navDestination(this.PageMap)

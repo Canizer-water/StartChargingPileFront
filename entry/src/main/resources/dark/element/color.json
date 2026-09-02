@@ -135,6 +135,18 @@
     {
       "name": "primary_blue",
       "value": "#6FA8FF"
+    },
+    {
+      "name": "primary_light",
+      "value": "#4AD89B"
+    },
+    {
+      "name": "red",
+      "value": "#FF6A6A"
+    },
+    {
+      "name": "border",
+      "value": "#33363C"
     }
   ]
 }
