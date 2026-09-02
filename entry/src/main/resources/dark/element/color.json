@@ -39,6 +39,58 @@
     {
       "name": "login_icon",
       "value": "#9AA0A6"
+    },
+    {
+      "name": "common_primary",
+      "value": "#6B9AEE"
+    },
+    {
+      "name": "common_primary_light",
+      "value": "#93BBF4"
+    },
+    {
+      "name": "common_primary_deep",
+      "value": "#4C7BE0"
+    },
+    {
+      "name": "common_text_primary",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "common_text_secondary",
+      "value": "#B8BEC6"
+    },
+    {
+      "name": "common_text_tertiary",
+      "value": "#7A828C"
+    },
+    {
+      "name": "common_bg",
+      "value": "#121212"
+    },
+    {
+      "name": "common_card_bg",
+      "value": "#1E1E1E"
+    },
+    {
+      "name": "common_border",
+      "value": "#333333"
+    },
+    {
+      "name": "common_divider",
+      "value": "#2C2C2C"
+    },
+    {
+      "name": "common_orange",
+      "value": "#ED823E"
+    },
+    {
+      "name": "common_yellow",
+      "value": "#F9DC4D"
+    },
+    {
+      "name": "common_red",
+      "value": "#EF5350"
     }
   ]
 }

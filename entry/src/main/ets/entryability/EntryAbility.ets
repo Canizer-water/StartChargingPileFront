@@ -11,6 +11,8 @@ export default class EntryAbility extends UIAbility {
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
+    // 初始化全局钱包余额（仅演示，AppStorage 为运行期共享内存）
+    AppStorage.setOrCreate('walletBalance', 0.0);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }
 

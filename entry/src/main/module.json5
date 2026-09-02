@@ -15,9 +15,9 @@
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "description": "$string:EntryAbility_desc",
-        "icon": "$media:battery_charging",
+        "icon": "$media:CARLOGO",
         "label": "$string:EntryAbility_label",
-        "startWindowIcon": "$media:battery_charging",
+        "startWindowIcon": "$media:CARLOGO",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
         "skills": [

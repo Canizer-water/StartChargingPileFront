@@ -1,3 +1,5 @@
+import { router } from '@kit.ArkUI';
+
 @Entry
 @Component
 struct LoginPage {
@@ -23,8 +25,11 @@ struct LoginPage {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端
-    this.showToast('登录功能开发中');
+    // 前端演示：暂未对接后端，直接进入首页
+    this.showToast('登录成功');
+    router.replaceUrl({ url: 'pages/Index' }).catch((err: Error) => {
+      console.error(`login navigate failed: ${JSON.stringify(err)}`);
+    });
   }
 
   @Builder
@@ -37,7 +42,7 @@ struct LoginPage {
           .borderRadius(40)
           .backgroundColor(Color.White)
           .opacity(0.92)
-        Image($r('app.media.battery_charging'))
+        Image($r('app.media.CARLOGO'))
           .width(50)
           .height(50)
       }

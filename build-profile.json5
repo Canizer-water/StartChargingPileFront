@@ -6,6 +6,7 @@
         "name": "default",
         "signingConfig": "default",
         "targetSdkVersion": "6.1.1(24)",
+        "compileSdkVersion": "6.1.1(24)",   // ← 加上这一行
         "compatibleSdkVersion": "6.1.0(23)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
@@ -18,7 +19,7 @@
     ],
     "buildModeSet": [
       {
-        "name": "debug",
+        "name": "debug"
       },
       {
         "name": "release"
