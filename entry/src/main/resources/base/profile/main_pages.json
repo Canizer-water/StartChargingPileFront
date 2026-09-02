@@ -1,6 +1,9 @@
 {
   "src": [
     "pages/Login",
-    "pages/Index"
+    "pages/Index",
+    "pages/ScanView",
+    "pages/ChargingPage",
+    "pages/ChargeCompletePage"
   ]
 }

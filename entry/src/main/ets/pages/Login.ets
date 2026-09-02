@@ -1,3 +1,5 @@
+import { router } from '@kit.ArkUI';
+
 @Entry
 @Component
 struct LoginPage {
@@ -23,8 +25,8 @@ struct LoginPage {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端
-    this.showToast('登录功能开发中');
+    // 前端演示：暂未对接后端，直接进入扫码页
+    router.pushUrl({ url: 'pages/ScanView' });
   }
 
   @Builder
