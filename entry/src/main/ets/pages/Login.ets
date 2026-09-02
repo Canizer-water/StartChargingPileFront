@@ -1,255 +1,262 @@
+import { router } from '@kit.ArkUI';
+
+// ============================================================
+// Login.ets - 登录页（Story 2，深色沉浸式）
+// 视觉基调：深蓝灰底 #1e2330 + 地图背景 + 白字 + 亮蓝按钮
+// 返回箭头置于内容层顶部（保证最左上方）；无"第三方注册"区
+// ============================================================
+
+// ---- 颜色规范 ----
+const COLOR_BG: string = '#1e2330';          // 页面背景（深蓝灰）
+const COLOR_TEXT_MAIN: string = '#ffffff';    // 主文字
+const COLOR_PLACEHOLDER: string = '#888888';  // 占位符
+const COLOR_ICON_DEFAULT: string = '#aaaaaa'; // 图标/次要色
+const COLOR_INPUT_LINE: string = '#333333';   // 输入框下划线
+const COLOR_BTN_PRIMARY: string = '#4a90e2';  // 登录按钮
+
 @Entry
 @Component
 struct LoginPage {
-  @State username: string = '';
+  // ---- 表单状态 ----
+  @State phoneNumber: string = '';
   @State password: string = '';
-  @State showPassword: boolean = false;
-  @State rememberPassword: boolean = false;
+  @State isPasswordVisible: boolean = false;
+  @State isLoginPressed: boolean = false;
 
   private showToast(message: string): void {
     try {
       this.getUIContext().getPromptAction().showToast({ message: message, duration: 2000 });
     } catch (err) {
-      console.error(`showToast failed: ${JSON.stringify(err)}`);
+      console.error(`LoginPage showToast failed: ${JSON.stringify(err)}`);
     }
   }
 
+  /** 页面显示时：若从注册页返回，自动回填刚注册的手机号 */
+  onPageShow(): void {
+    const p = AppStorage.get<string>('registeredPhone');
+    if (p !== undefined && p !== '') {
+      this.phoneNumber = p;
+      // 消费一次后清除，避免下次进入残留
+      AppStorage.setOrCreate('registeredPhone', '');
+    }
+  }
+
+  /** 登录校验与跳转 */
   private handleLogin(): void {
-    if (this.username.trim() === '') {
-      this.showToast('请输入手机号 / 用户名');
+    if (this.phoneNumber.trim() === '') {
+      this.showToast('请输入手机号');
       return;
     }
     if (this.password.trim() === '') {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端
-    this.showToast('登录功能开发中');
+    // 前端演示：暂未对接后端，校验通过进入首页
+    console.info(`LoginPage: login with phone=${this.phoneNumber}`);
+    router.replaceUrl({ url: 'pages/Index' });
   }
 
+  // ============================================================
+  // 品牌 Logo 区
+  // ============================================================
   @Builder
-  TopArea() {
+  BrandArea() {
     Column() {
-      Stack() {
-        Column()
-          .width(80)
-          .height(80)
-          .borderRadius(40)
-          .backgroundColor(Color.White)
-          .opacity(0.92)
-        Image($r('app.media.battery_charging'))
-          .width(50)
-          .height(50)
-      }
-      .width(80)
-      .height(80)
-
-      Text('智能充电桩')
-        .fontSize(26)
+      Text('TOWATT')
+        .fontSize(32)
         .fontWeight(FontWeight.Bold)
-        .fontColor($r('app.color.login_title'))
-        .margin({ top: 14 })
-
-      Text('扫码充电 · 智慧出行')
-        .fontSize(14)
-        .fontColor($r('app.color.login_slogan'))
-        .margin({ top: 8 })
+        .fontColor(COLOR_TEXT_MAIN)
+        .letterSpacing(2)
     }
-    .alignItems(HorizontalAlign.Center)
     .width('100%')
-    .margin({ top: 72 })
+    .alignItems(HorizontalAlign.Center)
   }
 
+  // ============================================================
+  // 下划线式输入行
+  // ============================================================
   @Builder
-  LoginCard() {
+  InputRow(placeholder: string, bindText: string, withEye: boolean) {
     Column() {
-      Text('欢迎回来')
-        .fontSize(24)
-        .fontWeight(FontWeight.Bold)
-        .fontColor($r('app.color.login_card_title'))
-        .width('100%')
-
-      Text('登录后开始管理您的充电桩')
-        .fontSize(13)
-        .fontColor($r('app.color.login_text_secondary'))
-        .margin({ top: 8 })
-        .width('100%')
-
-      // 用户名输入框
       Row() {
-        SymbolGlyph($r('sys.symbol.person'))
-          .fontSize(20)
-          .fontColor([$r('app.color.login_icon')])
-          .margin({ right: 12 })
-        TextInput({ placeholder: '请输入手机号 / 用户名', text: this.username })
-          .type(InputType.Normal)
-          .fontSize(15)
-          .fontColor($r('app.color.login_card_title'))
-          .placeholderColor($r('app.color.login_placeholder'))
-          .backgroundColor(Color.Transparent)
-          .layoutWeight(1)
-          .height(52)
-          .onChange((value: string) => {
-            this.username = value;
-          })
-      }
-      .width('100%')
-      .height(52)
-      .padding({ left: 16, right: 16 })
-      .backgroundColor($r('app.color.login_input_bg'))
-      .borderRadius(12)
-      .margin({ top: 28 })
-
-      // 密码输入框
-      Row() {
-        SymbolGlyph($r('sys.symbol.lock'))
-          .fontSize(20)
-          .fontColor([$r('app.color.login_icon')])
-          .margin({ right: 12 })
-        TextInput({ placeholder: '请输入密码', text: this.password })
-          .type(this.showPassword ? InputType.Normal : InputType.Password)
-          .fontSize(15)
-          .fontColor($r('app.color.login_card_title'))
-          .placeholderColor($r('app.color.login_placeholder'))
-          .backgroundColor(Color.Transparent)
-          .layoutWeight(1)
-          .height(52)
-          .enterKeyType(EnterKeyType.Done)
-          .onChange((value: string) => {
-            this.password = value;
-          })
-          .onSubmit(() => {
-            this.handleLogin();
-          })
-        if (this.showPassword) {
-          SymbolGlyph($r('sys.symbol.eye'))
-            .fontSize(20)
-            .fontColor([$r('app.color.login_icon')])
-            .onClick(() => {
-              this.showPassword = false;
+        if (withEye) {
+          // 密码输入：文字 + 眼睛切换
+          TextInput({ placeholder: placeholder, text: bindText })
+            .type(this.isPasswordVisible ? InputType.Normal : InputType.Password)
+            .fontSize(16)
+            .fontColor(COLOR_TEXT_MAIN)
+            .placeholderColor(COLOR_PLACEHOLDER)
+            .backgroundColor(Color.Transparent)
+            .layoutWeight(1)
+            .enterKeyType(EnterKeyType.Done)
+            .onChange((value: string) => {
+              this.password = value;
             })
+            .onSubmit(() => {
+              this.handleLogin();
+            })
+          if (this.isPasswordVisible) {
+            SymbolGlyph($r('sys.symbol.eye'))
+              .fontSize(20)
+              .fontColor([COLOR_ICON_DEFAULT])
+              .onClick(() => {
+                this.isPasswordVisible = false;
+              })
+          } else {
+            SymbolGlyph($r('sys.symbol.eye_slash'))
+              .fontSize(20)
+              .fontColor([COLOR_ICON_DEFAULT])
+              .onClick(() => {
+                this.isPasswordVisible = true;
+              })
+          }
         } else {
-          SymbolGlyph($r('sys.symbol.eye_slash'))
-            .fontSize(20)
-            .fontColor([$r('app.color.login_icon')])
-            .onClick(() => {
-              this.showPassword = true;
+          // 手机号输入
+          TextInput({ placeholder: placeholder, text: bindText })
+            .type(InputType.PhoneNumber)
+            .maxLength(11)
+            .fontSize(16)
+            .fontColor(COLOR_TEXT_MAIN)
+            .placeholderColor(COLOR_PLACEHOLDER)
+            .backgroundColor(Color.Transparent)
+            .layoutWeight(1)
+            .onChange((value: string) => {
+              this.phoneNumber = value;
             })
         }
       }
       .width('100%')
-      .height(52)
-      .padding({ left: 16, right: 16 })
-      .backgroundColor($r('app.color.login_input_bg'))
-      .borderRadius(12)
-      .margin({ top: 16 })
+      .height(54)
+      .alignItems(VerticalAlign.Center)
 
-      // 记住密码 & 忘记密码
-      Row() {
-        Checkbox()
-          .shape(CheckBoxShape.ROUNDED_SQUARE)
-          .select(this.rememberPassword)
-          .selectedColor($r('app.color.login_primary'))
-          .width(18)
-          .height(18)
-          .onChange((value: boolean) => {
-            this.rememberPassword = value;
-          })
-        Text('记住密码')
-          .fontSize(13)
-          .fontColor($r('app.color.login_text_secondary'))
-          .margin({ left: 6 })
-          .onClick(() => {
-            this.rememberPassword = !this.rememberPassword;
-          })
-
-        Blank()
-
-        Text('忘记密码？')
-          .fontSize(13)
-          .fontColor($r('app.color.login_primary'))
-          .onClick(() => {
-            this.showToast('请联系管理员重置密码');
-          })
-      }
-      .width('100%')
-      .margin({ top: 16 })
-
-      // 登录按钮
-      Button('登 录')
+      Divider()
+        .color(COLOR_INPUT_LINE)
         .width('100%')
-        .height(50)
-        .fontSize(17)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White)
-        .backgroundColor($r('app.color.login_primary'))
-        .borderRadius(25)
-        .margin({ top: 28 })
-        .onClick(() => {
-          this.handleLogin();
-        })
-
-      // 注册引导
-      Row() {
-        Text('还没有账号？')
-          .fontSize(13)
-          .fontColor($r('app.color.login_text_secondary'))
-        Text('立即注册')
-          .fontSize(13)
-          .fontWeight(FontWeight.Medium)
-          .fontColor($r('app.color.login_primary'))
-          .margin({ left: 4 })
-          .onClick(() => {
-            this.showToast('注册功能开发中');
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Center)
-      .margin({ top: 20 })
     }
     .width('100%')
-    .padding(24)
-    .backgroundColor($r('app.color.login_card_bg'))
-    .borderRadius(20)
-    .shadow({ radius: 24, color: 0x22000000, offsetY: 8 })
+  }
+
+  // ============================================================
+  // 登录按钮
+  // ============================================================
+  @Builder
+  LoginButton() {
+    Button('登 录')
+      .width('100%')
+      .height(48)
+      .fontSize(18)
+      .fontWeight(FontWeight.Medium)
+      .fontColor(COLOR_TEXT_MAIN)
+      .backgroundColor(COLOR_BTN_PRIMARY)
+      .borderRadius(8)
+      .opacity(this.isLoginPressed ? 0.9 : 1)
+      .onTouch((event: TouchEvent) => {
+        if (event.type === TouchType.Down) {
+          this.isLoginPressed = true;
+        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isLoginPressed = false;
+        }
+      })
+      .onClick(() => {
+        this.handleLogin();
+      })
+  }
+
+  // ============================================================
+  // 底部操作区（忘记密码 / 注册账号）
+  // ============================================================
+  @Builder
+  BottomActions() {
+    Row() {
+      Text('忘记密码')
+        .fontSize(14)
+        .fontColor(COLOR_TEXT_MAIN)
+        .onClick(() => {
+          this.showToast('请联系管理员重置密码');
+        })
+      Text('注册账号')
+        .fontSize(14)
+        .fontColor(COLOR_TEXT_MAIN)
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/Register' });
+        })
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.SpaceBetween)
+    .margin({ bottom: 24 })
   }
 
   build() {
-    Stack({ alignContent: Alignment.Top }) {
-      // 背景图
-      Image($r('app.media.background'))
-        .width('100%')
-        .height('100%')
-        .objectFit(ImageFit.Cover)
-
-      // 底部压暗渐变，提升文字可读性
+    Stack() {
+      // ---- 背景层：纯色 + 地图素材（60%）----
       Column()
         .width('100%')
         .height('100%')
-        .linearGradient({
-          angle: 180,
-          colors: [[0x00000000, 0.0], [0x00000000, 0.5], [0xBF000000, 1.0]]
-        })
+        .backgroundColor(COLOR_BG)
 
+      Image($r('app.media.login_map_bg'))
+        .width('100%')
+        .height('100%')
+        .objectFit(ImageFit.Cover)
+        .opacity(0.6)
+
+      // ---- 内容层（最上层）----
       Column() {
-        this.TopArea()
+        // 顶部返回箭头（最左上方）
+        Row() {
+          Text('←')
+            .fontSize(24)
+            .fontColor(COLOR_TEXT_MAIN)
+            .onClick(() => {
+              router.back();
+            })
+        }
+        .width('100%')
+        .padding({ left: 16, top: 16 })
+
+        // 主内容组（品牌 + 表单 + 按钮）整体垂直居中
+        Blank()
+
+        Column() {
+          // 品牌 Logo 区
+          this.BrandArea()
+
+          // 输入表单区（TOWATT 下约 64vp）
+          Column() {
+            this.InputRow('请输入手机号', this.phoneNumber, false)
+            // 两输入框之间间距约 18vp
+            Column() {
+              this.InputRow('请输入密码', this.password, true)
+            }
+            .margin({ top: 18 })
+          }
+          .width('100%')
+          .margin({ top: 64 })
+
+          // 登录按钮（距密码框 40vp）
+          Column() {
+            this.LoginButton()
+          }
+          .width('100%')
+          .margin({ top: 40 })
+        }
+        .width('100%')
+        .padding({ left: 32, right: 32 })
 
         Blank()
 
-        this.LoginCard()
-
-        Text('v1.0.0')
-          .fontSize(12)
-          .fontColor($r('app.color.login_slogan'))
-          .opacity(0.6)
-          .margin({ top: 20, bottom: 24 })
+        // 底部操作区
+        Column() {
+          this.BottomActions()
+        }
+        .width('100%')
+        .padding({ left: 32, right: 32 })
       }
       .width('100%')
       .height('100%')
-      .padding({ left: 24, right: 24 })
     }
     .width('100%')
     .height('100%')
-    .backgroundColor($r('app.color.start_window_background'))
+    .backgroundColor(COLOR_BG)
   }
 }
