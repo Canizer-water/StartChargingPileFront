@@ -132,7 +132,7 @@ struct ChargeCompletePage {
               .backgroundColor($r('app.color.login_primary'))
               .borderRadius(8)
               .onClick(() => {
-                this.getUIContext().getPromptAction().showToast({ message: '账单功能开发中', duration: 2000 });
+                router.pushUrl({ url: 'pages/BillPage' });
               })
           }
           .width('100%')

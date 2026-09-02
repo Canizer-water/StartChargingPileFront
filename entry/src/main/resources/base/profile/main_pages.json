@@ -4,6 +4,7 @@
     "pages/Index",
     "pages/ScanView",
     "pages/ChargingPage",
-    "pages/ChargeCompletePage"
+    "pages/ChargeCompletePage",
+    "pages/BillPage"
   ]
 }
