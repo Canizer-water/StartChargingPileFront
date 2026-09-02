@@ -23,8 +23,12 @@ struct LoginPage {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端
-    this.showToast('登录功能开发中');
+    // 前端演示：暂未对接后端，登录成功后进入主框架
+    try {
+      this.getUIContext().getRouter().replaceUrl({ url: 'pages/Index' });
+    } catch (err) {
+      this.showToast('跳转失败，请重试');
+    }
   }
 
   @Builder

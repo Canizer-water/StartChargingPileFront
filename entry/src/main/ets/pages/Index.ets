@@ -1,23 +1,35 @@
+import { NavParam } from '../model/Types';
+import { NearbyStationsPage } from '../view/NearbyStationsPage';
+import { StationDetailPage } from '../view/station/StationDetailPage';
+import { PileDetailPage } from '../view/station/PileDetailPage';
+
+/**
+ * 主框架（Navigation 宿主）。
+ * 以「附近电站」为根内容，通过 NavPathStack 跳转二级、三级页面。
+ */
+
 @Entry
 @Component
 struct Index {
-  @State message: string = 'Hello World';
+  pathStack: NavPathStack = new NavPathStack();
+
+  @Builder
+  PageMap(name: string, param: object) {
+    if (name === 'StationDetail') {
+      StationDetailPage({ pathStack: this.pathStack, stationId: (param as NavParam).id })
+    } else if (name === 'PileDetail') {
+      PileDetailPage({ pathStack: this.pathStack, pileId: (param as NavParam).id })
+    }
+  }
 
   build() {
-    RelativeContainer() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize($r('app.float.page_text_font_size'))
-        .fontWeight(FontWeight.Bold)
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .onClick(() => {
-          this.message = 'Welcome';
-        })
+    Navigation(this.pathStack) {
+      NearbyStationsPage({ pathStack: this.pathStack })
     }
-    .height('100%')
+    .hideTitleBar(true)
+    .navDestination(this.PageMap)
     .width('100%')
+    .height('100%')
+    .backgroundColor($r('app.color.app_bg'))
   }
 }
