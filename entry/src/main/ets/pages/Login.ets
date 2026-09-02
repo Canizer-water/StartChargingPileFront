@@ -6,6 +6,14 @@ struct LoginPage {
   @State showPassword: boolean = false;
   @State rememberPassword: boolean = false;
 
+  aboutToAppear(): void {
+    // 注册成功回填手机号（Story 1）
+    const phone = AppStorage.get<string>('registeredPhone');
+    if (phone && phone !== '') {
+      this.username = phone;
+    }
+  }
+
   private showToast(message: string): void {
     try {
       this.getUIContext().getPromptAction().showToast({ message: message, duration: 2000 });
@@ -204,7 +212,11 @@ struct LoginPage {
           .fontColor($r('app.color.login_primary'))
           .margin({ left: 4 })
           .onClick(() => {
-            this.showToast('注册功能开发中');
+            try {
+              this.getUIContext().getRouter().pushUrl({ url: 'pages/Register' });
+            } catch (err) {
+              this.showToast('跳转注册页失败');
+            }
           })
       }
       .width('100%')
