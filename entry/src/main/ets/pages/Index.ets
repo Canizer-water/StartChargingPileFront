@@ -19,17 +19,29 @@ struct Index {
   @Builder
   PageMap(name: string, param: object) {
     if (name === 'NearbyStations') {
-      NearbyStationsPage({ pathStack: this.pathStack })
+      NavDestination() {
+        NearbyStationsPage({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     } else if (name === 'Wallet') {
-      WalletView({ pathStack: this.pathStack })
+      NavDestination() {
+        WalletView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     } else if (name === 'MyVehicles') {
-      MyVehiclesView({ pathStack: this.pathStack })
+      NavDestination() {
+        MyVehiclesView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     } else if (name === 'OrderHistory') {
-      OrderHistoryView({ pathStack: this.pathStack })
+      NavDestination() {
+        OrderHistoryView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     } else if (name === 'Recharge') {
-      RechargeView({ pathStack: this.pathStack })
+      NavDestination() {
+        RechargeView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     } else if (name === 'Invoice') {
-      InvoiceView({ pathStack: this.pathStack })
+      NavDestination() {
+        InvoiceView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     }
   }
 
