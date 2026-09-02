@@ -1,6 +1,12 @@
 {
   "src": [
     "pages/Login",
-    "pages/Index"
+    "pages/Index",
+    "pages/Profile",
+    "pages/UserDetail",
+    "pages/MyWallet",
+    "pages/MyCar",
+    "pages/History",
+    "pages/Notifications"
   ]
 }

@@ -1,3 +1,5 @@
+import { router } from '@kit.ArkUI';
+
 @Entry
 @Component
 struct LoginPage {
@@ -23,8 +25,12 @@ struct LoginPage {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端
-    this.showToast('登录功能开发中');
+    // 演示登录：暂无后端，登录成功后进入个人中心
+    router.pushUrl({ url: 'pages/Profile' }, (err) => {
+      if (err) {
+        console.error('push pages/Profile failed: ' + JSON.stringify(err));
+      }
+    });
   }
 
   @Builder

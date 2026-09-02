@@ -39,6 +39,138 @@
     {
       "name": "login_icon",
       "value": "#7A828C"
+    },
+    {
+      "name": "profile_bg",
+      "value": "#F5F7FA"
+    },
+    {
+      "name": "profile_text_primary",
+      "value": "#333333"
+    },
+    {
+      "name": "profile_text_secondary",
+      "value": "#8A94A6"
+    },
+    {
+      "name": "profile_icon",
+      "value": "#1450B8"
+    },
+    {
+      "name": "profile_icon_bg_start",
+      "value": "#EAF2FF"
+    },
+    {
+      "name": "profile_icon_bg_end",
+      "value": "#D8E7FF"
+    },
+    {
+      "name": "profile_chevron",
+      "value": "#C3CAD4"
+    },
+    {
+      "name": "profile_badge",
+      "value": "#FF4D4F"
+    },
+    {
+      "name": "profile_divider",
+      "value": "#F0F2F5"
+    },
+    {
+      "name": "profile_header_start",
+      "value": "#081C45"
+    },
+    {
+      "name": "profile_header_middle",
+      "value": "#0E3E8C"
+    },
+    {
+      "name": "profile_header_end",
+      "value": "#0C86A8"
+    },
+    {
+      "name": "profile_header_text",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "profile_header_sub",
+      "value": "#BFE6FF"
+    },
+    {
+      "name": "profile_avatar_start",
+      "value": "#52C8FF"
+    },
+    {
+      "name": "profile_avatar_end",
+      "value": "#1E5FD9"
+    },
+    {
+      "name": "profile_avatar_ring",
+      "value": "#CCFFFFFF"
+    },
+    {
+      "name": "profile_skeleton",
+      "value": "#E6EAF1"
+    },
+    {
+      "name": "profile_sub_bg",
+      "value": "#F5F7FA"
+    },
+    {
+      "name": "profile_placeholder_bg",
+      "value": "#F7F9FC"
+    },
+    {
+      "name": "uc_page_bg",
+      "value": "#F5F8FC"
+    },
+    {
+      "name": "uc_text_primary",
+      "value": "#1F2937"
+    },
+    {
+      "name": "uc_text_secondary",
+      "value": "#98A2B3"
+    },
+    {
+      "name": "uc_blue",
+      "value": "#2196F3"
+    },
+    {
+      "name": "uc_blue_deep",
+      "value": "#1976D2"
+    },
+    {
+      "name": "uc_cyan",
+      "value": "#00BCD4"
+    },
+    {
+      "name": "uc_light_bg",
+      "value": "#E8F3FF"
+    },
+    {
+      "name": "uc_cyan_bg",
+      "value": "#E0F7FA"
+    },
+    {
+      "name": "uc_cyan_text",
+      "value": "#00838F"
+    },
+    {
+      "name": "uc_white",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "uc_divider",
+      "value": "#EEF2F7"
+    },
+    {
+      "name": "uc_badge",
+      "value": "#FF4D4F"
+    },
+    {
+      "name": "uc_grid",
+      "value": "#E9EEF4"
     }
   ]
 }
