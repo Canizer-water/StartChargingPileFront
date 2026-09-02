@@ -147,6 +147,50 @@
     {
       "name": "border",
       "value": "#33363C"
+    },
+    {
+      "name": "profile_text_primary",
+      "value": "#F2F3F5"
+    },
+    {
+      "name": "profile_badge",
+      "value": "#FF6A6A"
+    },
+    {
+      "name": "profile_divider",
+      "value": "#2A2D33"
+    },
+    {
+      "name": "profile_header_text",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "profile_header_sub",
+      "value": "#BFE6FF"
+    },
+    {
+      "name": "uc_page_bg",
+      "value": "#121418"
+    },
+    {
+      "name": "uc_text_primary",
+      "value": "#F2F3F5"
+    },
+    {
+      "name": "uc_text_secondary",
+      "value": "#AEB4BC"
+    },
+    {
+      "name": "uc_blue",
+      "value": "#6FA8FF"
+    },
+    {
+      "name": "uc_light_bg",
+      "value": "#16304F"
+    },
+    {
+      "name": "uc_divider",
+      "value": "#2A2D33"
     }
   ]
 }

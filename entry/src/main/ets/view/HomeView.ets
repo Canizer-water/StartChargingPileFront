@@ -20,7 +20,8 @@ export struct HomeView {
   private homeItems: HomeItem[] = [
     { icon: $r('sys.symbol.wallet'), title: '我的钱包', desc: '余额 · 红包 · 优惠券 · 发票', color: '#5B8CE7', route: 'Wallet' },
     { icon: $r('sys.symbol.car'), title: '我的爱车', desc: '车辆管理 · 自动支付', color: '#ED823E', route: 'MyVehicles' },
-    { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', color: '#6B5CE7', route: 'OrderHistory' }
+    { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', color: '#6B5CE7', route: 'OrderHistory' },
+    { icon: $r('sys.symbol.person'), title: '个人中心', desc: '用户信息 · 车辆 · 钱包', color: '#3FC98A', route: 'Profile' }
   ];
 
   private go(route: string): void {

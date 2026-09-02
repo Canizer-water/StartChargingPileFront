@@ -5,6 +5,9 @@ import { MyVehiclesView } from '../view/MyVehiclesView';
 import { OrderHistoryView } from '../view/OrderHistoryView';
 import { RechargeView } from '../view/RechargeView';
 import { InvoiceView } from '../view/InvoiceView';
+import { ProfileView } from '../view/mine/ProfileView';
+import { UserDetailView } from '../view/mine/UserDetailView';
+import { NotificationsView } from '../view/mine/NotificationsView';
 
 /**
  * 主框架（Navigation 宿主）。
@@ -41,6 +44,18 @@ struct Index {
     } else if (name === 'Invoice') {
       NavDestination() {
         InvoiceView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'Profile') {
+      NavDestination() {
+        ProfileView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'UserDetail') {
+      NavDestination() {
+        UserDetailView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'Notifications') {
+      NavDestination() {
+        NotificationsView({ pathStack: this.pathStack })
       }.hideTitleBar(true)
     }
   }
