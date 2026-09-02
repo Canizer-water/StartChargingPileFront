@@ -1,0 +1,44 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#000000"
+    },
+    {
+      "name": "login_primary",
+      "value": "#2EC480"
+    },
+    {
+      "name": "login_card_bg",
+      "value": "#1E1E1E"
+    },
+    {
+      "name": "login_input_bg",
+      "value": "#2A2A2A"
+    },
+    {
+      "name": "login_card_title",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "login_title",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "login_slogan",
+      "value": "#C5E5D4"
+    },
+    {
+      "name": "login_text_secondary",
+      "value": "#9AA0A6"
+    },
+    {
+      "name": "login_placeholder",
+      "value": "#6E747A"
+    },
+    {
+      "name": "login_icon",
+      "value": "#9AA0A6"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "layered-image":
+  {
+    "background" : "$media:battery_charging",
+    "foreground" : "$media:battery_charging"
+  }
+}
