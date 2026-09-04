@@ -1,6 +1,7 @@
 import { LineIcon } from '../../component/LineIcon';
 import { TrendChart } from '../../component/TrendChart';
 import { NavParam } from '../../model/Types';
+import { Theme } from '../../common/Theme';
 
 /**
  * 用户详情（从个人中心头像进入）。
@@ -10,6 +11,8 @@ import { NavParam } from '../../model/Types';
 @Component
 export struct UserDetailView {
   pathStack: NavPathStack = new NavPathStack();
+
+  @StorageLink('isDarkMode') isDark: boolean = false;
 
   private userName: string = 'XX智能充电';
   private plateNo: string = '车牌号：京A·88888';
@@ -44,17 +47,17 @@ export struct UserDetailView {
   }
 
   @Builder
-  StatCell(iconKind: string, value: string, label: string, iconBg: string, iconColor: string) {
+  StatCell(iconKind: string, value: string, label: string) {
     Column() {
       Row() {
-        LineIcon({ kind: iconKind, color: iconColor })
+        LineIcon({ kind: iconKind, color: Theme.palette(this.isDark).brand })
       }
       .width(42)
       .height(42)
       .borderRadius(21)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor(iconBg)
+      .backgroundColor($r('app.color.tint_blue'))
 
       Text(value)
         .fontSize(23)
@@ -75,14 +78,14 @@ export struct UserDetailView {
   HeaderArea() {
     Row() {
       Row() {
-        LineIcon({ kind: 'back', color: '#1F2937' })
+        LineIcon({ kind: 'back', color: Theme.palette(this.isDark).textPrimary })
       }
       .width(40)
       .height(40)
       .borderRadius(20)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor('#F4F7FB')
+      .backgroundColor($r('app.color.chip_bg'))
       .onClick(() => {
         this.pathStack.pop();
       })
@@ -98,9 +101,9 @@ export struct UserDetailView {
         .alignItems(VerticalAlign.Center)
         .linearGradient({
           angle: 135,
-          colors: [[0xFF52C8FF, 0.0], [0xFF1E5FD9, 1.0]]
+          colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.brand_deep'), 1.0]]
         })
-        .border({ width: 2, color: 0x1A2196F3 })
+        .border({ width: 2, color: 'rgba(91,140,231,0.12)' })
 
         Column() {
           Row() {
@@ -137,14 +140,14 @@ export struct UserDetailView {
       .padding({ left: 12 })
 
       Row() {
-        LineIcon({ kind: 'exit', color: '#1F2937' })
+        LineIcon({ kind: 'exit', color: Theme.palette(this.isDark).textPrimary })
       }
       .width(40)
       .height(40)
       .borderRadius(20)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor('#F4F7FB')
+      .backgroundColor($r('app.color.chip_bg'))
       .onClick(() => {
         this.exitAccount();
       })
@@ -156,19 +159,19 @@ export struct UserDetailView {
   @Builder
   StatsCard() {
     Row() {
-      this.StatCell('yuan', this.balanceYuan, '充电余额（元）', '#E8F3FF', '#2196F3')
+      this.StatCell('yuan', this.balanceYuan, '充电余额（元）')
       Column()
         .width(1)
         .height(62)
         .backgroundColor($r('app.color.uc_divider'))
-      this.StatCell('bolt', this.monthKwh, '本月充电量（度）', '#E0F7FA', '#00838F')
+      this.StatCell('bolt', this.monthKwh, '本月充电量（度）')
     }
     .width('100%')
     .padding({ top: 20, bottom: 20 })
     .alignItems(VerticalAlign.Center)
     .backgroundColor($r('app.color.app_card'))
-    .borderRadius(16)
-    .shadow({ radius: 12, color: 0x08000000, offsetY: 2 })
+    .borderRadius(12)
+    .border({ width: 1, color: $r('app.color.divider') })
   }
 
   @Builder
@@ -194,7 +197,7 @@ export struct UserDetailView {
             .fontSize(12)
             .fontColor($r('app.color.uc_blue'))
           Row() {
-            LineIcon({ kind: 'chevronRight', color: '#2196F3' })
+            LineIcon({ kind: 'chevronRight', color: Theme.palette(this.isDark).brand })
           }
           .width(10)
           .height(10)
@@ -214,15 +217,15 @@ export struct UserDetailView {
     }
     .width('100%')
     .backgroundColor($r('app.color.app_card'))
-    .borderRadius(16)
-    .shadow({ radius: 12, color: 0x08000000, offsetY: 2 })
+    .borderRadius(12)
+    .border({ width: 1, color: $r('app.color.divider') })
   }
 
   @Builder
   SettingCard() {
     Row() {
       Row() {
-        LineIcon({ kind: 'bolt', color: '#2196F3' })
+        LineIcon({ kind: 'bolt', color: Theme.palette(this.isDark).brand })
       }
       .width(42)
       .height(42)
@@ -255,8 +258,8 @@ export struct UserDetailView {
     .padding({ left: 16, right: 16, top: 14, bottom: 14 })
     .alignItems(VerticalAlign.Center)
     .backgroundColor($r('app.color.app_card'))
-    .borderRadius(16)
-    .shadow({ radius: 12, color: 0x08000000, offsetY: 2 })
+    .borderRadius(12)
+    .border({ width: 1, color: $r('app.color.divider') })
   }
 
   build() {

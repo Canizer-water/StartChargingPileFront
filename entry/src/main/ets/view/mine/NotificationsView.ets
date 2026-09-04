@@ -1,8 +1,10 @@
 import { LineIcon } from '../../component/LineIcon';
+import { Theme } from '../../common/Theme';
+import { AppTopBar } from '../../component/AppTopBar';
 
 /**
  * 系统通知：通知列表 + 客服反馈入口。
- * 深蓝渐变背景 + 半透明白卡。
+ * 标准浅底页面 + 白色卡片，与全局蓝色设计系统一致。
  */
 
 class NotificationItem {
@@ -29,6 +31,8 @@ const NOTIFICATION_DATA: NotificationItem[] = [
 export struct NotificationsView {
   pathStack: NavPathStack = new NavPathStack();
 
+  @StorageLink('isDarkMode') isDark: boolean = false;
+
   private notifications: NotificationItem[] = NOTIFICATION_DATA;
 
   private showToast(message: string): void {
@@ -40,29 +44,34 @@ export struct NotificationsView {
   }
 
   @Builder
+  IconTile(kind: string) {
+    Row() {
+      LineIcon({ kind: kind, color: Theme.palette(this.isDark).brand })
+    }
+    .width(42)
+    .height(42)
+    .borderRadius(21)
+    .justifyContent(FlexAlign.Center)
+    .alignItems(VerticalAlign.Center)
+    .backgroundColor($r('app.color.tint_blue'))
+  }
+
+  @Builder
   NotificationCard(item: NotificationItem) {
     Row() {
-      Row() {
-        LineIcon({ kind: item.iconKind, color: '#26599A' })
-      }
-      .width(42)
-      .height(42)
-      .borderRadius(21)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(VerticalAlign.Center)
-      .backgroundColor(0x33FFFFFF)
+      this.IconTile(item.iconKind)
 
       Column({ space: 6 }) {
         Text(item.title)
           .fontSize(16)
           .fontWeight(FontWeight.Bold)
-          .fontColor('#16385B')
+          .fontColor($r('app.color.text_primary'))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
         Text(item.content)
-          .fontSize(14)
-          .fontColor('#3F6188')
+          .fontSize(13)
+          .fontColor($r('app.color.text_secondary'))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
       }
@@ -70,19 +79,15 @@ export struct NotificationsView {
       .layoutWeight(1)
       .margin({ left: 12, right: 10 })
 
-      Row() {
-        LineIcon({ kind: 'chevronRight', color: '#6284AC' })
-      }
-      .width(20)
-      .height(20)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(VerticalAlign.Center)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(16)
+        .fontColor([$r('app.color.text_muted')])
     }
     .width('100%')
     .padding(14)
     .borderRadius(12)
-    .backgroundColor(0xE6FFFFFF)
-    .border({ width: 1, color: '#D8E7F7' })
+    .backgroundColor($r('app.color.app_card'))
+    .border({ width: 1, color: $r('app.color.divider') })
     .alignItems(VerticalAlign.Center)
     .onClick(() => {
       this.showToast('查看通知详情：' + item.title);
@@ -92,37 +97,25 @@ export struct NotificationsView {
   @Builder
   ServiceCard() {
     Row() {
-      Row() {
-        LineIcon({ kind: 'chat', color: '#26599A' })
-      }
-      .width(42)
-      .height(42)
-      .borderRadius(21)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(VerticalAlign.Center)
-      .backgroundColor(0x33FFFFFF)
+      this.IconTile('chat')
 
       Text('客服反馈')
         .fontSize(16)
         .fontWeight(FontWeight.Medium)
-        .fontColor('#16385B')
+        .fontColor($r('app.color.text_primary'))
         .margin({ left: 12 })
 
       Blank()
 
-      Row() {
-        LineIcon({ kind: 'chevronRight', color: '#6284AC' })
-      }
-      .width(20)
-      .height(20)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(VerticalAlign.Center)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(16)
+        .fontColor([$r('app.color.text_muted')])
     }
     .width('100%')
     .padding(14)
     .borderRadius(12)
-    .backgroundColor(0xE6FFFFFF)
-    .border({ width: 1, color: '#D8E7F7' })
+    .backgroundColor($r('app.color.app_card'))
+    .border({ width: 1, color: $r('app.color.divider') })
     .alignItems(VerticalAlign.Center)
     .margin({ top: 24 })
     .onClick(() => {
@@ -132,30 +125,7 @@ export struct NotificationsView {
 
   build() {
     Column() {
-      Row() {
-        Row() {
-          LineIcon({ kind: 'back', color: '#FFFFFF' })
-        }
-        .width(36)
-        .height(36)
-        .borderRadius(18)
-        .justifyContent(FlexAlign.Center)
-        .alignItems(VerticalAlign.Center)
-        .backgroundColor(0x26FFFFFF)
-        .onClick(() => {
-          this.pathStack.pop();
-        })
-
-        Text('系统通知')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(Color.White)
-          .margin({ left: 6 })
-      }
-      .width('100%')
-      .height(52)
-      .padding({ left: 8, right: 16 })
-      .alignItems(VerticalAlign.Center)
+      AppTopBar({ title: '系统通知', pathStack: this.pathStack })
 
       Scroll() {
         Column() {
@@ -169,7 +139,7 @@ export struct NotificationsView {
           this.ServiceCard()
         }
         .width('100%')
-        .padding({ left: 16, right: 16, top: 8, bottom: 24 })
+        .padding({ left: 16, right: 16, top: 12, bottom: 24 })
       }
       .layoutWeight(1)
       .width('100%')
@@ -177,10 +147,6 @@ export struct NotificationsView {
     }
     .width('100%')
     .height('100%')
-    .padding({ top: 8 })
-    .linearGradient({
-      angle: 180,
-      colors: [[0xFF0F3160, 0.0], [0xFF5A8DC0, 1.0]]
-    })
+    .backgroundColor($r('app.color.app_bg'))
   }
 }

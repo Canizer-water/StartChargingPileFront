@@ -1,5 +1,6 @@
 import { LineIcon } from '../../component/LineIcon';
 import { NavParam } from '../../model/Types';
+import { Theme } from '../../common/Theme';
 
 /**
  * 个人中心（"我的"入口）。
@@ -23,6 +24,8 @@ class ProfileMenuItem {
 @Component
 export struct ProfileView {
   pathStack: NavPathStack = new NavPathStack();
+
+  @StorageLink('isDarkMode') isDark: boolean = false;
 
   private menuItems: ProfileMenuItem[] = [
     new ProfileMenuItem('wallet', '我的钱包', 'wallet', '2'),
@@ -137,7 +140,7 @@ export struct ProfileView {
       .alignItems(VerticalAlign.Center)
       .linearGradient({
         angle: 135,
-        colors: [[0xFF52C8FF, 0.0], [0xFF1E5FD9, 1.0]]
+        colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.brand_deep'), 1.0]]
       })
       .border({ width: 2, color: 0xCCFFFFFF })
       .shadow({ radius: 12, color: 0x30000000, offsetY: 4 })
@@ -184,17 +187,14 @@ export struct ProfileView {
   MenuRow(item: ProfileMenuItem) {
     Row() {
       Row() {
-        LineIcon({ kind: item.iconKind, color: '#1450B8' })
+        LineIcon({ kind: item.iconKind, color: Theme.palette(this.isDark).brand })
       }
       .width(44)
       .height(44)
       .borderRadius(13)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .linearGradient({
-        angle: 135,
-        colors: [[0xFFEAF2FF, 0.0], [0xFFD8E7FF, 1.0]]
-      })
+      .backgroundColor($r('app.color.tint_blue'))
 
       Text(item.title)
         .fontSize(15)
@@ -218,7 +218,7 @@ export struct ProfileView {
         .alignItems(VerticalAlign.Center)
       } else {
         Row() {
-          LineIcon({ kind: 'chevronRight', color: '#C3CAD4' })
+          LineIcon({ kind: 'chevronRight', color: Theme.palette(this.isDark).textMuted })
         }
         .width(14)
         .height(14)
@@ -257,7 +257,7 @@ export struct ProfileView {
       .height(196)
       .linearGradient({
         angle: 135,
-        colors: [[0xFF081C45, 0.0], [0xFF0E3E8C, 0.55], [0xFF0C86A8, 1.0]]
+        colors: [[$r('app.color.brand_deep'), 0.0], [$r('app.color.login_primary'), 0.55], [$r('app.color.primary_light'), 1.0]]
       })
 
       Column() {
