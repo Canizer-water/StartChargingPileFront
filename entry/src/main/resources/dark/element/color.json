@@ -6,7 +6,7 @@
     },
     {
       "name": "login_primary",
-      "value": "#2EC480"
+      "value": "#6E9BE8"
     },
     {
       "name": "login_card_bg",
@@ -26,7 +26,7 @@
     },
     {
       "name": "login_slogan",
-      "value": "#C5E5D4"
+      "value": "#C6D7EF"
     },
     {
       "name": "login_text_secondary",
@@ -191,6 +191,50 @@
     {
       "name": "uc_divider",
       "value": "#2A2D33"
+    },
+    {
+      "name": "charge_title",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "charge_secondary",
+      "value": "#9AA0A6"
+    },
+    {
+      "name": "charge_card_bg",
+      "value": "#1E1E1E"
+    },
+    {
+      "name": "charge_ring_bg",
+      "value": "#2A2A2A"
+    },
+    {
+      "name": "charge_field_bg",
+      "value": "#262626"
+    },
+    {
+      "name": "charge_tint_bg",
+      "value": "#1B2A3F"
+    },
+    {
+      "name": "scan_corner",
+      "value": "#6E9BE8"
+    },
+    {
+      "name": "scan_hint",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "scan_bar_bg",
+      "value": "#0E1626"
+    },
+    {
+      "name": "scan_result_bg",
+      "value": "#1E1E1E"
+    },
+    {
+      "name": "accent",
+      "value": "#ED823E"
     }
   ]
 }

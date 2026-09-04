@@ -2,6 +2,10 @@
   "src": [
     "pages/Login",
     "pages/Register",
-    "pages/Index"
+    "pages/Index",
+    "pages/ScanView",
+    "pages/ChargingPage",
+    "pages/ChargeCompletePage",
+    "pages/BillPage"
   ]
 }
