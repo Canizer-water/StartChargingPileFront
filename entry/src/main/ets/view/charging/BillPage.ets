@@ -8,6 +8,8 @@ import { PrimaryButton } from '../../component/PrimaryButton';
 @Component
 export struct BillPage {
   pathStack: NavPathStack = new NavPathStack();
+  /** 账单订单号（由路由参数注入） */
+  orderId: string = '';
 
   @State orderNo: string = 'CP2026090212345678';
   @State paid: boolean = true;

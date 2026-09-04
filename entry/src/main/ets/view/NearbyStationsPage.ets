@@ -12,6 +12,8 @@ import { AppTopBar } from '../component/AppTopBar';
 @Component
 export struct NearbyStationsPage {
   pathStack: NavPathStack = new NavPathStack();
+  /** tab 模式（主框架内嵌）时隐藏返回键 */
+  embedded: boolean = false;
 
   @State stations: ChargingStation[] = [];
   @State nearest: ChargingStation | undefined = undefined;
@@ -248,7 +250,7 @@ export struct NearbyStationsPage {
 
   build() {
     Column() {
-      AppTopBar({ title: '附近电站', pathStack: this.pathStack })
+      AppTopBar({ title: '附近电站', pathStack: this.pathStack, showBack: !this.embedded })
 
       Scroll() {
         Column() {

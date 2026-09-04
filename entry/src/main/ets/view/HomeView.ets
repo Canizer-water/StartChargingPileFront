@@ -1,33 +1,15 @@
-import { NavParam } from '../model/Types';
+import { ChargeStatusCard } from '../component/ChargeStatusCard';
 
 /**
- * 首页（导航根）：功能宫格入口。
- * 汇聚「附近电站」充电主流程 + 钱包/爱车/订单等扩展功能。
+ * 首页 tab（Story 4/5）：充电状态卡片 + 附近充电站快捷入口。
+ * 原「我的服务」宫格为超纲功能入口，本轮按 doc 功能点范围撤下。
  */
-
-interface HomeItem {
-  icon: Resource;
-  title: string;
-  desc: string;
-  route: string;
-}
 
 @Component
 export struct HomeView {
   pathStack: NavPathStack = new NavPathStack();
-
-  private homeItems: HomeItem[] = [
-    { icon: $r('sys.symbol.qrcode'), title: '扫码充电', desc: '对准桩身二维码启动充电', route: 'Scan' },
-    { icon: $r('sys.symbol.wallet'), title: '我的钱包', desc: '余额 · 红包 · 优惠券 · 发票', route: 'Wallet' },
-    { icon: $r('sys.symbol.car'), title: '我的爱车', desc: '车辆管理 · 自动支付', route: 'MyVehicles' },
-    { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', route: 'OrderHistory' },
-    { icon: $r('sys.symbol.person'), title: '个人中心', desc: '用户信息 · 车辆 · 钱包', route: 'Profile' }
-  ];
-
-  private go(route: string): void {
-    const param: NavParam = { id: '' };
-    this.pathStack.pushPathByName(route, param);
-  }
+  /** 切换主框架底部 tab（附近电站入口 / 找桩 CTA 用） */
+  onGoTab?: (index: number) => void;
 
   @Builder
   Header() {
@@ -47,7 +29,7 @@ export struct HomeView {
     .padding(16)
   }
 
-  /** 附近电站入口横幅 */
+  /** 附近电站入口横幅（Story 5：点击切到充电 tab） */
   @Builder
   NearbyBanner() {
     Stack({ alignContent: Alignment.Center }) {
@@ -86,47 +68,11 @@ export struct HomeView {
     .height(96)
     .borderRadius(14)
     .clip(true)
-    .onClick(() => this.go('NearbyStations'))
-  }
-
-  @Builder
-  MenuCard(item: HomeItem) {
-    Row() {
-      Stack() {
-        SymbolGlyph(item.icon)
-          .fontSize(24)
-          .fontColor([$r('app.color.btn_primary')])
+    .onClick(() => {
+      if (this.onGoTab) {
+        this.onGoTab(1);
       }
-      .width(48)
-      .height(48)
-      .borderRadius(12)
-      .backgroundColor($r('app.color.tint_blue'))
-
-      Column() {
-        Text(item.title)
-          .fontSize(17)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.text_primary'))
-        Text(item.desc)
-          .fontSize(13)
-          .fontColor($r('app.color.text_secondary'))
-          .margin({ top: 4 })
-      }
-      .alignItems(HorizontalAlign.Start)
-      .layoutWeight(1)
-      .margin({ left: 14 })
-
-      SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(18)
-        .fontColor([$r('app.color.text_muted')])
-    }
-    .width('100%')
-    .height(76)
-    .padding({ left: 16, right: 16 })
-    .backgroundColor($r('app.color.app_card'))
-    .borderRadius(12)
-    .margin({ bottom: 12 })
-    .onClick(() => this.go(item.route))
+    })
   }
 
   @Builder
@@ -145,12 +91,18 @@ export struct HomeView {
 
       Scroll() {
         Column() {
-          this.NearbyBanner()
+          this.SectionTitle('充电状态')
+          ChargeStatusCard({
+            pathStack: this.pathStack,
+            onFindPile: () => {
+              if (this.onGoTab) {
+                this.onGoTab(1);
+              }
+            }
+          })
 
-          this.SectionTitle('我的服务')
-          ForEach(this.homeItems, (item: HomeItem) => {
-            this.MenuCard(item)
-          }, (item: HomeItem) => item.route)
+          this.SectionTitle('快捷入口')
+          this.NearbyBanner()
         }
         .padding({ left: 16, right: 16, bottom: 24 })
       }

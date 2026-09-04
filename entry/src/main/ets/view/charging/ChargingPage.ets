@@ -9,6 +9,8 @@ import { PrimaryButton } from '../../component/PrimaryButton';
 @Component
 export struct ChargingPage {
   pathStack: NavPathStack = new NavPathStack();
+  /** 充电会话订单号（由路由参数注入） */
+  orderId: string = '';
 
   @State progress: number = 68;
   @State elapsed: number = 1860;

@@ -9,6 +9,8 @@ import { PrimaryButton } from '../../component/PrimaryButton';
 @Component
 export struct ChargeCompletePage {
   pathStack: NavPathStack = new NavPathStack();
+  /** 结算订单号（由路由参数注入） */
+  orderId: string = '';
 
   @State duration: string = '31';
   @State kwh: string = '23.12';

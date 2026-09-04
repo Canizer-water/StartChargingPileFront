@@ -9,6 +9,8 @@ import { NavParam } from '../../model/Types';
 @Component
 export struct ScanView {
   pathStack: NavPathStack = new NavPathStack();
+  /** tab 模式（主框架内嵌）时隐藏返回键 */
+  embedded: boolean = false;
 
   @State scanOffset: number = 208;
   @State scanDone: boolean = false;
@@ -70,12 +72,16 @@ export struct ScanView {
   @Builder
   TitleBar() {
     Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.scan_hint')])
-        .onClick(() => {
-          this.pathStack.pop();
-        })
+      if (this.embedded) {
+        Row().width(24).height(24)
+      } else {
+        SymbolGlyph($r('sys.symbol.chevron_left'))
+          .fontSize(24)
+          .fontColor([$r('app.color.scan_hint')])
+          .onClick(() => {
+            this.pathStack.pop();
+          })
+      }
       Blank()
       Text('扫一扫')
         .fontSize(17)
