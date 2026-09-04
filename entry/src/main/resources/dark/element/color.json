@@ -1,240 +1,67 @@
 {
   "color": [
-    {
-      "name": "start_window_background",
-      "value": "#000000"
-    },
-    {
-      "name": "login_primary",
-      "value": "#6E9BE8"
-    },
-    {
-      "name": "login_card_bg",
-      "value": "#1E1E1E"
-    },
-    {
-      "name": "login_input_bg",
-      "value": "#2A2A2A"
-    },
-    {
-      "name": "login_card_title",
-      "value": "#FFFFFF"
-    },
-    {
-      "name": "login_title",
-      "value": "#FFFFFF"
-    },
-    {
-      "name": "login_slogan",
-      "value": "#C6D7EF"
-    },
-    {
-      "name": "login_text_secondary",
-      "value": "#9AA0A6"
-    },
-    {
-      "name": "login_placeholder",
-      "value": "#6E747A"
-    },
-    {
-      "name": "login_icon",
-      "value": "#9AA0A6"
-    },
-    {
-      "name": "app_bg",
-      "value": "#121418"
-    },
-    {
-      "name": "app_card",
-      "value": "#1E2025"
-    },
-    {
-      "name": "text_primary",
-      "value": "#F2F3F5"
-    },
-    {
-      "name": "text_secondary",
-      "value": "#AEB4BC"
-    },
-    {
-      "name": "text_muted",
-      "value": "#6E747A"
-    },
-    {
-      "name": "divider",
-      "value": "#2A2D33"
-    },
-    {
-      "name": "price_orange",
-      "value": "#FF8A50"
-    },
-    {
-      "name": "tag_blue_bg",
-      "value": "#16304F"
-    },
-    {
-      "name": "tag_blue_text",
-      "value": "#6FA8FF"
-    },
-    {
-      "name": "tag_green_bg",
-      "value": "#163528"
-    },
-    {
-      "name": "tag_green_text",
-      "value": "#2EC480"
-    },
-    {
-      "name": "btn_primary",
-      "value": "#2EC480"
-    },
-    {
-      "name": "map_bg",
-      "value": "#1A1D22"
-    },
-    {
-      "name": "map_road",
-      "value": "#2A2D33"
-    },
-    {
-      "name": "map_park",
-      "value": "#1F3A2A"
-    },
-    {
-      "name": "map_water",
-      "value": "#193041"
-    },
-    {
-      "name": "map_marker",
-      "value": "#2EC480"
-    },
-    {
-      "name": "map_marker_you",
-      "value": "#6FA8FF"
-    },
-    {
-      "name": "top_bar_bg",
-      "value": "#1E2025"
-    },
-    {
-      "name": "chip_bg",
-      "value": "#2A2D33"
-    },
-    {
-      "name": "pile_idle",
-      "value": "#2EC480"
-    },
-    {
-      "name": "pile_charging",
-      "value": "#F5A623"
-    },
-    {
-      "name": "pile_offline",
-      "value": "#6E747A"
-    },
-    {
-      "name": "primary_blue",
-      "value": "#6FA8FF"
-    },
-    {
-      "name": "primary_light",
-      "value": "#4AD89B"
-    },
-    {
-      "name": "red",
-      "value": "#FF6A6A"
-    },
-    {
-      "name": "border",
-      "value": "#33363C"
-    },
-    {
-      "name": "profile_text_primary",
-      "value": "#F2F3F5"
-    },
-    {
-      "name": "profile_badge",
-      "value": "#FF6A6A"
-    },
-    {
-      "name": "profile_divider",
-      "value": "#2A2D33"
-    },
-    {
-      "name": "profile_header_text",
-      "value": "#FFFFFF"
-    },
-    {
-      "name": "profile_header_sub",
-      "value": "#BFE6FF"
-    },
-    {
-      "name": "uc_page_bg",
-      "value": "#121418"
-    },
-    {
-      "name": "uc_text_primary",
-      "value": "#F2F3F5"
-    },
-    {
-      "name": "uc_text_secondary",
-      "value": "#AEB4BC"
-    },
-    {
-      "name": "uc_blue",
-      "value": "#6FA8FF"
-    },
-    {
-      "name": "uc_light_bg",
-      "value": "#16304F"
-    },
-    {
-      "name": "uc_divider",
-      "value": "#2A2D33"
-    },
-    {
-      "name": "charge_title",
-      "value": "#FFFFFF"
-    },
-    {
-      "name": "charge_secondary",
-      "value": "#9AA0A6"
-    },
-    {
-      "name": "charge_card_bg",
-      "value": "#1E1E1E"
-    },
-    {
-      "name": "charge_ring_bg",
-      "value": "#2A2A2A"
-    },
-    {
-      "name": "charge_field_bg",
-      "value": "#262626"
-    },
-    {
-      "name": "charge_tint_bg",
-      "value": "#1B2A3F"
-    },
-    {
-      "name": "scan_corner",
-      "value": "#6E9BE8"
-    },
-    {
-      "name": "scan_hint",
-      "value": "#FFFFFF"
-    },
-    {
-      "name": "scan_bar_bg",
-      "value": "#0E1626"
-    },
-    {
-      "name": "scan_result_bg",
-      "value": "#1E1E1E"
-    },
-    {
-      "name": "accent",
-      "value": "#ED823E"
-    }
+    { "name": "start_window_background", "value": "#000000" },
+    { "name": "login_primary", "value": "#6E9BE8" },
+    { "name": "login_card_bg", "value": "#1E2025" },
+    { "name": "login_input_bg", "value": "#262A31" },
+    { "name": "login_card_title", "value": "#F2F3F5" },
+    { "name": "login_title", "value": "#FFFFFF" },
+    { "name": "login_slogan", "value": "#C6D7EF" },
+    { "name": "login_text_secondary", "value": "#AEB4BC" },
+    { "name": "login_placeholder", "value": "#6E747A" },
+    { "name": "login_icon", "value": "#9AA0A6" },
+    { "name": "app_bg", "value": "#121418" },
+    { "name": "app_card", "value": "#1E2025" },
+    { "name": "text_primary", "value": "#F2F3F5" },
+    { "name": "text_secondary", "value": "#AEB4BC" },
+    { "name": "text_muted", "value": "#6E747A" },
+    { "name": "divider", "value": "#2A2D33" },
+    { "name": "border", "value": "#33363C" },
+    { "name": "chip_bg", "value": "#2A2D33" },
+    { "name": "top_bar_bg", "value": "#1E2025" },
+    { "name": "price_orange", "value": "#F09663" },
+    { "name": "accent", "value": "#F09663" },
+    { "name": "red", "value": "#FF6A6A" },
+    { "name": "tag_blue_bg", "value": "#16304F" },
+    { "name": "tag_blue_text", "value": "#6E9BE8" },
+    { "name": "tag_green_bg", "value": "#163528" },
+    { "name": "tag_green_text", "value": "#2EC480" },
+    { "name": "btn_primary", "value": "#6E9BE8" },
+    { "name": "primary_blue", "value": "#6E9BE8" },
+    { "name": "primary_light", "value": "#8FB3F5" },
+    { "name": "brand_deep", "value": "#2E5EAA" },
+    { "name": "tint_blue", "value": "#16304F" },
+    { "name": "tint_orange", "value": "#33251A" },
+    { "name": "tint_green", "value": "#163528" },
+    { "name": "map_bg", "value": "#1A1D22" },
+    { "name": "map_road", "value": "#2A2D33" },
+    { "name": "map_park", "value": "#1F3A2A" },
+    { "name": "map_water", "value": "#193041" },
+    { "name": "map_marker", "value": "#2EC480" },
+    { "name": "map_marker_you", "value": "#6E9BE8" },
+    { "name": "pile_idle", "value": "#2EC480" },
+    { "name": "pile_charging", "value": "#F5A623" },
+    { "name": "pile_offline", "value": "#6E747A" },
+    { "name": "profile_text_primary", "value": "#F2F3F5" },
+    { "name": "profile_badge", "value": "#FF6A6A" },
+    { "name": "profile_divider", "value": "#2A2D33" },
+    { "name": "profile_header_text", "value": "#FFFFFF" },
+    { "name": "profile_header_sub", "value": "#BFE6FF" },
+    { "name": "uc_page_bg", "value": "#121418" },
+    { "name": "uc_text_primary", "value": "#F2F3F5" },
+    { "name": "uc_text_secondary", "value": "#AEB4BC" },
+    { "name": "uc_blue", "value": "#6E9BE8" },
+    { "name": "uc_light_bg", "value": "#16304F" },
+    { "name": "uc_divider", "value": "#2A2D33" },
+    { "name": "charge_title", "value": "#F2F3F5" },
+    { "name": "charge_secondary", "value": "#AEB4BC" },
+    { "name": "charge_card_bg", "value": "#1E2025" },
+    { "name": "charge_ring_bg", "value": "#2A2D33" },
+    { "name": "charge_field_bg", "value": "#262A31" },
+    { "name": "charge_tint_bg", "value": "#16304F" },
+    { "name": "scan_corner", "value": "#6E9BE8" },
+    { "name": "scan_hint", "value": "#FFFFFF" },
+    { "name": "scan_bar_bg", "value": "#0E1626" },
+    { "name": "scan_result_bg", "value": "#1E2025" }
   ]
 }
