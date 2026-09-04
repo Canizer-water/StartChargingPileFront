@@ -9,7 +9,6 @@ interface HomeItem {
   icon: Resource;
   title: string;
   desc: string;
-  color: string;
   route: string;
 }
 
@@ -18,10 +17,10 @@ export struct HomeView {
   pathStack: NavPathStack = new NavPathStack();
 
   private homeItems: HomeItem[] = [
-    { icon: $r('sys.symbol.wallet'), title: '我的钱包', desc: '余额 · 红包 · 优惠券 · 发票', color: '#5B8CE7', route: 'Wallet' },
-    { icon: $r('sys.symbol.car'), title: '我的爱车', desc: '车辆管理 · 自动支付', color: '#ED823E', route: 'MyVehicles' },
-    { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', color: '#6B5CE7', route: 'OrderHistory' },
-    { icon: $r('sys.symbol.person'), title: '个人中心', desc: '用户信息 · 车辆 · 钱包', color: '#3FC98A', route: 'Profile' }
+    { icon: $r('sys.symbol.wallet'), title: '我的钱包', desc: '余额 · 红包 · 优惠券 · 发票', route: 'Wallet' },
+    { icon: $r('sys.symbol.car'), title: '我的爱车', desc: '车辆管理 · 自动支付', route: 'MyVehicles' },
+    { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', route: 'OrderHistory' },
+    { icon: $r('sys.symbol.person'), title: '个人中心', desc: '用户信息 · 车辆 · 钱包', route: 'Profile' }
   ];
 
   private go(route: string): void {
@@ -56,7 +55,7 @@ export struct HomeView {
         .height('100%')
         .linearGradient({
           angle: 135,
-          colors: [[0x33A984, 0.0], [0x1FA869, 0.6], [0x0E6B44, 1.0]]
+          colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.6], [$r('app.color.brand_deep'), 1.0]]
         })
       Row() {
         SymbolGlyph($r('sys.symbol.bolt_fill'))
@@ -95,12 +94,12 @@ export struct HomeView {
       Stack() {
         SymbolGlyph(item.icon)
           .fontSize(24)
-          .fontColor([Color.White])
+          .fontColor([$r('app.color.btn_primary')])
       }
       .width(48)
       .height(48)
       .borderRadius(12)
-      .backgroundColor(item.color)
+      .backgroundColor($r('app.color.tint_blue'))
 
       Column() {
         Text(item.title)

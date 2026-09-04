@@ -1,6 +1,7 @@
 import { ChargingStation, NavParam } from '../model/Types';
 import { StationService } from '../service/StationService';
 import { MapView } from '../component/MapView';
+import { AppTopBar } from '../component/AppTopBar';
 
 /**
  * 一级页面：附近充电中心（含地图显示 + 最近大卡 + 推荐排行）。
@@ -22,50 +23,9 @@ export struct NearbyStationsPage {
     this.recommended = svc.getRecommended();
   }
 
-  private showToast(message: string): void {
-    try {
-      this.getUIContext().getPromptAction().showToast({ message: message, duration: 1500 });
-    } catch (err) {
-      console.error(`showToast failed: ${JSON.stringify(err)}`);
-    }
-  }
-
   private goDetail(id: string): void {
     const param: NavParam = { id: id };
     this.pathStack.pushPathByName('StationDetail', param);
-  }
-
-  private onBack(): void {
-    if (this.pathStack.size() > 0) {
-      this.pathStack.pop();
-    } else {
-      this.showToast('已是附近电站首页');
-    }
-  }
-
-  /** 顶部栏 */
-  @Builder
-  TopBar() {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .onClick(() => this.onBack())
-
-      Text('附近电站')
-        .fontSize(17)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-        .layoutWeight(1)
-        .textAlign(TextAlign.Center)
-        .margin({ right: 24 })
-
-      Blank().width(24)
-    }
-    .width('100%')
-    .height(48)
-    .padding({ left: 8, right: 8 })
-    .backgroundColor($r('app.color.top_bar_bg'))
   }
 
   /** 标签 chip */
@@ -89,7 +49,7 @@ export struct NearbyStationsPage {
         .height('100%')
         .linearGradient({
           angle: 135,
-          colors: [[0x33A984, 0.0], [0x1FA869, 0.55], [0x0E6B44, 1.0]]
+          colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.55], [$r('app.color.brand_deep'), 1.0]]
         })
       SymbolGlyph($r('sys.symbol.bolt_fill'))
         .fontSize(54)
@@ -174,7 +134,7 @@ export struct NearbyStationsPage {
     .width('100%')
     .backgroundColor($r('app.color.app_card'))
     .borderRadius(12)
-    .shadow({ radius: 10, color: 0x14000000, offsetY: 4 })
+    .border({ width: 1, color: $r('app.color.divider') })
     .onClick(() => this.goDetail(station.id))
   }
 
@@ -188,7 +148,7 @@ export struct NearbyStationsPage {
           .height('100%')
           .linearGradient({
             angle: 135,
-            colors: [[0x5AA8E0, 0.0], [0x2F7BF6, 0.6], [0x1B53BF, 1.0]]
+            colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.6], [$r('app.color.brand_deep'), 1.0]]
           })
         SymbolGlyph($r('sys.symbol.bolt_fill'))
           .fontSize(28)
@@ -278,7 +238,7 @@ export struct NearbyStationsPage {
   @Builder
   SectionTitle(text: string) {
     Text(text)
-      .fontSize(19)
+      .fontSize(17)
       .fontWeight(FontWeight.Bold)
       .fontColor($r('app.color.text_primary'))
       .width('100%')
@@ -287,7 +247,7 @@ export struct NearbyStationsPage {
 
   build() {
     Column() {
-      this.TopBar()
+      AppTopBar({ title: '附近电站', pathStack: this.pathStack })
 
       Scroll() {
         Column() {
@@ -297,7 +257,7 @@ export struct NearbyStationsPage {
             .height(220)
             .borderRadius(12)
             .clip(true)
-            .margin({ left: 14, right: 14, top: 6 })
+            .margin({ top: 8 })
 
           if (this.nearest) {
             this.SectionTitle('离我最近')
@@ -313,7 +273,7 @@ export struct NearbyStationsPage {
             .margin({ bottom: 10 })
           }, (st: ChargingStation) => st.id)
         }
-        .padding({ left: 14, right: 14, bottom: 20 })
+        .padding({ left: 16, right: 16, bottom: 20 })
       }
       .width('100%')
       .layoutWeight(1)

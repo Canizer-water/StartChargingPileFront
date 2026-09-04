@@ -1,3 +1,6 @@
+import { AppTopBar } from '../component/AppTopBar';
+import { PrimaryButton } from '../component/PrimaryButton';
+
 /**
  * 注册页（Story 1）。
  * 字段：手机号 / 密码 / 确认密码 + 用户协议勾选。
@@ -65,49 +68,17 @@ struct RegisterPage {
   }
 
   @Builder
-  NavBar() {
-    Row() {
-      Text('←')
-        .fontSize(24)
-        .fontColor($r('app.color.text_primary'))
-        .width(48)
-        .onClick(() => this.goBack())
-
-      Text('注册')
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-        .layoutWeight(1)
-        .textAlign(TextAlign.Center)
-
-      Row().width(48)
-    }
-    .width('100%')
-    .height(56)
-    .padding({ left: 16 })
-    .backgroundColor($r('app.color.app_card'))
-    .alignItems(VerticalAlign.Center)
-
-    Divider().color($r('app.color.divider')).width('100%')
-  }
-
-  @Builder
   AgreementRow() {
     Row() {
-      Stack() {
-        if (this.isAgreed) {
-          Text('✓')
-            .fontSize(11)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(Color.White)
-        }
-      }
-      .width(16)
-      .height(16)
-      .borderRadius(8)
-      .backgroundColor(this.isAgreed ? $r('app.color.btn_primary') : $r('app.color.app_card'))
-      .border({ width: 1, color: this.isAgreed ? $r('app.color.btn_primary') : $r('app.color.border') })
-      .clip(true)
+      Checkbox()
+        .shape(CheckBoxShape.ROUNDED_SQUARE)
+        .select(this.isAgreed)
+        .selectedColor($r('app.color.btn_primary'))
+        .width(18)
+        .height(18)
+        .onChange((value: boolean) => {
+          this.isAgreed = value;
+        })
 
       Row() {
         Text('我已阅读并同意')
@@ -126,14 +97,14 @@ struct RegisterPage {
           .onClick(() => this.showToast('《隐私政策》内容查看开发中'))
       }
       .margin({ left: 8 })
+      .onClick(() => {
+        this.isAgreed = !this.isAgreed;
+      })
 
       Blank()
     }
     .width('100%')
     .alignItems(VerticalAlign.Center)
-    .onClick(() => {
-      this.isAgreed = !this.isAgreed;
-    })
   }
 
   /** 下划线输入行 */
@@ -196,7 +167,7 @@ struct RegisterPage {
   build() {
     Scroll() {
       Column() {
-        this.NavBar()
+        AppTopBar({ title: '注册', onBack: () => this.goBack() })
 
         Column() {
           this.InputRow($r('sys.symbol.person'), '请输入手机号', this.phone, false, false)
@@ -212,18 +183,10 @@ struct RegisterPage {
         .margin({ top: 20 })
 
         Column() {
-          Button('注 册')
-            .width('90%')
-            .height(48)
-            .fontSize(17)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(Color.White)
-            .backgroundColor($r('app.color.btn_primary'))
-            .borderRadius(8)
-            .onClick(() => this.handleRegister())
+          PrimaryButton({ label: '注 册', onTap: () => this.handleRegister() })
         }
         .width('100%')
-        .alignItems(HorizontalAlign.Center)
+        .padding({ left: 24, right: 24 })
         .margin({ top: 32 })
 
         Row() {

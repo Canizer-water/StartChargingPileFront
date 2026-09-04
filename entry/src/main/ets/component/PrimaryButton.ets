@@ -5,8 +5,8 @@
 @Component
 export struct PrimaryButton {
   @Prop label: string = '';
-  @Prop outline: boolean = false;
-  @Prop disabled: boolean = false;
+  @Prop isOutline: boolean = false;
+  @Prop isDisabled: boolean = false;
   @Prop fullWidth: boolean = true;
   color: ResourceColor = $r('app.color.btn_primary');
   radius: number = 24;
@@ -18,12 +18,12 @@ export struct PrimaryButton {
       .height(48)
       .fontSize(16)
       .fontWeight(FontWeight.Bold)
-      .fontColor(this.outline ? this.color : Color.White)
-      .backgroundColor(this.outline ? $r('app.color.app_card') : this.color)
-      .border({ width: 1.5, color: this.outline ? this.color : Color.Transparent })
+      .fontColor(this.isOutline ? this.color : Color.White)
+      .backgroundColor(this.isOutline ? $r('app.color.app_card') : this.color)
+      .border({ width: 1.5, color: this.isOutline ? this.color : Color.Transparent })
       .borderRadius(this.radius)
       .padding({ left: 24, right: 24 })
-      .enabled(!this.disabled)
+      .enabled(!this.isDisabled)
       .onClick(() => {
         if (this.onTap) {
           this.onTap();

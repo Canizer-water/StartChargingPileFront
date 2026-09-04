@@ -41,6 +41,7 @@
     { "name": "map_marker_you", "value": "#5B8CE7" },
     { "name": "pile_idle", "value": "#1FA869" },
     { "name": "pile_charging", "value": "#F5A623" },
+    { "name": "pile_charging_bg", "value": "#FDF1DF" },
     { "name": "pile_offline", "value": "#B4BAC2" },
     { "name": "profile_text_primary", "value": "#1F2329" },
     { "name": "profile_badge", "value": "#FF4D4F" },

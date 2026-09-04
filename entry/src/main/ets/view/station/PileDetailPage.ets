@@ -1,5 +1,7 @@
 import { ChargingPile } from '../../model/Types';
 import { StationService } from '../../service/StationService';
+import { AppTopBar } from '../../component/AppTopBar';
+import { PrimaryButton } from '../../component/PrimaryButton';
 
 /**
  * 三级页面：电枪（充电桩）详情。
@@ -34,30 +36,6 @@ export struct PileDetailPage {
       return '充电中';
     }
     return '离线';
-  }
-
-  @Builder
-  TopBar() {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .onClick(() => this.pathStack.pop())
-
-      Text('电枪详情')
-        .fontSize(17)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-        .layoutWeight(1)
-        .textAlign(TextAlign.Center)
-        .margin({ right: 24 })
-
-      Blank().width(24)
-    }
-    .width('100%')
-    .height(48)
-    .padding({ left: 8, right: 8 })
-    .backgroundColor($r('app.color.top_bar_bg'))
   }
 
   /** 车牌号 */
@@ -116,8 +94,10 @@ export struct PileDetailPage {
           .borderRadius(3)
         Text(this.statusLabel())
           .fontSize(12)
-          .fontColor(this.pile?.status === 'CHARGING' ? $r('app.color.pile_charging') : $r('app.color.btn_primary'))
-          .backgroundColor(this.pile?.status === 'CHARGING' ? 'rgba(245,166,35,0.12)' : $r('app.color.tag_green_bg'))
+          .fontColor(this.pile?.status === 'CHARGING' ? $r('app.color.pile_charging')
+            : (this.pile?.status === 'IDLE' ? $r('app.color.pile_idle') : $r('app.color.pile_offline')))
+          .backgroundColor(this.pile?.status === 'CHARGING' ? $r('app.color.pile_charging_bg')
+            : (this.pile?.status === 'IDLE' ? $r('app.color.tag_green_bg') : $r('app.color.chip_bg')))
           .padding({ left: 6, right: 6, top: 2, bottom: 2 })
           .borderRadius(3)
           .margin({ left: 8 })
@@ -190,14 +170,14 @@ export struct PileDetailPage {
         Blank()
           .width(44)
           .height(14)
-          .backgroundColor('#D5DBE3')
+          .backgroundColor($r('app.color.border'))
           .borderRadius(3)
         Column() {
           SymbolGlyph($r('sys.symbol.bolt_fill'))
             .fontSize(26)
-            .fontColor(['#7EE2B8'])
+            .fontColor([$r('app.color.primary_light')])
           Circle({ width: 8, height: 8 })
-            .fill('#2EC480')
+            .fill($r('app.color.pile_idle'))
             .margin({ top: 6 })
         }
         .width(54)
@@ -253,27 +233,23 @@ export struct PileDetailPage {
         .fontSize(13)
         .fontColor($r('app.color.text_secondary'))
       Blank()
-      Button('立即充电')
-        .height(48)
-        .fontSize(16)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White)
-        .backgroundColor($r('app.color.btn_primary'))
-        .borderRadius(24)
-        .padding({ left: 36, right: 36 })
-        .onClick(() => this.showToast('已选桩，即将开始充电（Story 10 确认弹窗待实现）'))
+      PrimaryButton({
+        label: '立即充电',
+        fullWidth: false,
+        onTap: () => this.showToast('已选桩，即将开始充电（Story 10 确认弹窗待实现）')
+      })
     }
     .width('100%')
     .height(64)
     .padding({ left: 16, right: 16 })
     .backgroundColor($r('app.color.app_card'))
-    .shadow({ radius: 8, color: 0x1A000000, offsetY: -2 })
+    .border({ width: { top: 1 }, color: $r('app.color.divider') })
   }
 
   build() {
     NavDestination() {
       Column() {
-        this.TopBar()
+        AppTopBar({ title: '电枪详情', pathStack: this.pathStack })
 
         Scroll() {
           Column() {
@@ -283,7 +259,7 @@ export struct PileDetailPage {
               this.Diagram(this.pile)
             }
           }
-          .padding({ left: 14, right: 14, bottom: 16 })
+          .padding({ left: 16, right: 16, bottom: 16 })
         }
         .width('100%')
         .layoutWeight(1)

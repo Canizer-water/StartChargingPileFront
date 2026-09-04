@@ -39,7 +39,7 @@ export struct StationDetailPage {
         .height('100%')
         .linearGradient({
           angle: 160,
-          colors: [[0x3A8FBF, 0.0], [0x1C5F92, 0.6], [0x0A3352, 1.0]]
+          colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.6], [$r('app.color.brand_deep'), 1.0]]
         })
 
       // 返回按钮
@@ -118,7 +118,7 @@ export struct StationDetailPage {
         .margin({ left: 4 })
 
       Stack() {
-        Circle({ width: 10, height: 10 }).fill($r('app.color.btn_primary'))
+        Circle({ width: 10, height: 10 }).fill($r('app.color.pile_idle'))
       }
       .margin({ left: 24 })
       Text(`${station.freePiles}个`)
@@ -291,8 +291,8 @@ export struct StationDetailPage {
           this.InfoGrid(this.station)
 
           Text('推荐充电桩')
-            .fontSize(15)
-            .fontWeight(FontWeight.Medium)
+            .fontSize(17)
+            .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.text_primary'))
             .width('100%')
             .padding({ left: 16, top: 18, bottom: 8 })
@@ -303,7 +303,7 @@ export struct StationDetailPage {
                 this.PileCard(pile)
               }, (pile: ChargingPile) => pile.id)
             }
-            .padding({ left: 14, right: 14, bottom: 20 })
+            .padding({ left: 16, right: 16, bottom: 20 })
           }
           .width('100%')
           .layoutWeight(1)
