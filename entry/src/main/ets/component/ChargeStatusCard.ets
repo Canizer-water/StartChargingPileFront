@@ -45,7 +45,7 @@ export struct ChargeStatusCard {
           .fontColor($r('app.color.text_primary'))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-        Text(`已充 ${o.energyKwh.toFixed(2)} 度 · ¥${o.unitPrice.toFixed(2)}/度`)
+        Text(`¥${o.unitPrice.toFixed(2)}/度 · 点击查看实时充电状态`)
           .fontSize(13)
           .fontColor($r('app.color.text_secondary'))
       }

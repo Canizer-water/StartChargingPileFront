@@ -1,23 +1,48 @@
-import { NavParam } from '../../model/Types';
+import { common } from '@kit.AbilityKit';
+import { ChargingOrder, NavParam } from '../../model/Types';
+import { OrderService } from '../../service/OrderService';
 import { AppTopBar } from '../../component/AppTopBar';
 import { InfoRow } from '../../component/InfoRow';
 import { PrimaryButton } from '../../component/PrimaryButton';
 
 /**
- * 充电结束汇总（Story 13）：电量/时长/费用总结，进入账单或返回首页。
+ * 充电结束汇总（Story 13）：数据取自结算后的真实订单，
+ * 查看账单进入 Bill，返回首页回到导航根。
  */
+
 @Component
 export struct ChargeCompletePage {
   pathStack: NavPathStack = new NavPathStack();
   /** 结算订单号（由路由参数注入） */
   orderId: string = '';
 
-  @State duration: string = '31';
-  @State kwh: string = '23.12';
-  @State cost: string = '27.74';
+  @State order: ChargingOrder | null = null;
+
+  aboutToAppear(): void {
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    OrderService.getInstance().init(ctx).then(async () => {
+      const order = await OrderService.getInstance().getOrderById(this.orderId);
+      if (!order) {
+        this.toast('未找到订单');
+        this.pathStack.pop();
+        return;
+      }
+      this.order = order;
+    }).catch(() => {
+      // 加载失败保持空态
+    });
+  }
+
+  private toast(message: string): void {
+    try {
+      this.getUIContext().getPromptAction().showToast({ message: message, duration: 1500 });
+    } catch (err) {
+      console.error(`ChargeCompletePage toast failed: ${JSON.stringify(err)}`);
+    }
+  }
 
   private goBill(): void {
-    const param: NavParam = { id: 'CP2026090212345678' };
+    const param: NavParam = { id: this.orderId };
     this.pathStack.pushPathByName('Bill', param);
   }
 
@@ -50,17 +75,17 @@ export struct ChargeCompletePage {
   }
 
   @Builder
-  SummaryCardContent() {
+  SummaryCardContent(o: ChargingOrder) {
     Column({ space: 8 }) {
-      InfoRow({ label: '充电桩', value: 'P-005' })
+      InfoRow({ label: '充电桩', value: o.pileCode })
       Divider().color($r('app.color.divider'))
-      InfoRow({ label: '充电时长', value: `${this.duration} min` })
+      InfoRow({ label: '充电时长', value: `${o.durationMin} min` })
       Divider().color($r('app.color.divider'))
-      InfoRow({ label: '充电电量', value: `${this.kwh} kWh`, valueColor: $r('app.color.btn_primary') })
+      InfoRow({ label: '充电电量', value: `${o.energyKwh.toFixed(2)} kWh`, valueColor: $r('app.color.btn_primary') })
       Divider().color($r('app.color.divider'))
-      InfoRow({ label: '订单号', value: 'CP2026090212345678' })
+      InfoRow({ label: '订单号', value: o.id })
       Divider().color($r('app.color.divider'))
-      InfoRow({ label: '充电费用', value: `¥${this.cost}`, valueColor: $r('app.color.accent') })
+      InfoRow({ label: '充电费用', value: `¥${o.amount.toFixed(2)}`, valueColor: $r('app.color.accent') })
     }
     .width('100%')
   }
@@ -73,34 +98,36 @@ export struct ChargeCompletePage {
         Column({ space: 16 }) {
           this.SuccessCard()
 
-          Column() {
-            this.SummaryCardContent()
-          }
-          .width('100%')
-          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-          .backgroundColor($r('app.color.app_card'))
-          .borderRadius(12)
-          .border({ width: 1, color: $r('app.color.divider') })
-
-          Row({ space: 14 }) {
+          if (this.order) {
             Column() {
-              PrimaryButton({
-                label: '返回首页',
-                isOutline: true,
-                onTap: () => this.backHome()
-              })
+              this.SummaryCardContent(this.order)
             }
-            .layoutWeight(1)
+            .width('100%')
+            .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+            .backgroundColor($r('app.color.app_card'))
+            .borderRadius(12)
+            .border({ width: 1, color: $r('app.color.divider') })
 
-            Column() {
-              PrimaryButton({
-                label: '查看账单',
-                onTap: () => this.goBill()
-              })
+            Row({ space: 14 }) {
+              Column() {
+                PrimaryButton({
+                  label: '返回首页',
+                  isOutline: true,
+                  onTap: () => this.backHome()
+                })
+              }
+              .layoutWeight(1)
+
+              Column() {
+                PrimaryButton({
+                  label: '查看账单',
+                  onTap: () => this.goBill()
+                })
+              }
+              .layoutWeight(1)
             }
-            .layoutWeight(1)
+            .width('100%')
           }
-          .width('100%')
         }
         .width('100%')
         .padding({ left: 16, right: 16, top: 8, bottom: 24 })

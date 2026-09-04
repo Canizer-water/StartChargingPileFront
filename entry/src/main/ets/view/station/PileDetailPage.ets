@@ -1,6 +1,9 @@
-import { ChargingPile, NavParam } from '../../model/Types';
+import { common } from '@kit.AbilityKit';
+import { ChargingOrder, ChargingPile, NavParam } from '../../model/Types';
 import { StationService } from '../../service/StationService';
 import { pileMeta } from '../../model/MockData';
+import { OrderResult, OrderService, StartOrderRequest } from '../../service/OrderService';
+import { ChargingConfirmDialog } from './ChargingConfirmDialog';
 import { AppTopBar } from '../../component/AppTopBar';
 import { PrimaryButton } from '../../component/PrimaryButton';
 
@@ -16,9 +19,60 @@ export struct PileDetailPage {
 
   @State pile: ChargingPile | undefined = undefined;
   @State plate: string = '';
+  @State starting: boolean = false;
+  private dialogController: CustomDialogController | null = null;
 
   aboutToAppear(): void {
     this.pile = StationService.getInstance().getPileById(this.pileId);
+  }
+
+  /** 启动充电：先弹确认框（Story 10），确认后经 OrderService 生成会话订单 */
+  private confirmStart(): void {
+    const pile = this.pile;
+    if (!pile) {
+      return;
+    }
+    if (pile.status !== 'IDLE') {
+      this.showToast('该充电桩当前不可用');
+      return;
+    }
+    this.dialogController = new CustomDialogController({
+      builder: ChargingConfirmDialog({
+        pile: pile,
+        onConfirm: () => this.doStartCharging(pile.id)
+      }),
+      autoCancel: true,
+      customStyle: true,
+      alignment: DialogAlignment.Center
+    });
+    this.dialogController.open();
+  }
+
+  private doStartCharging(pileId: string): void {
+    if (this.starting) {
+      return;
+    }
+    this.starting = true;
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    const req: StartOrderRequest = { pileId: pileId };
+    OrderService.getInstance().init(ctx)
+      .then(() => OrderService.getInstance().startOrder(req))
+      .then((res: OrderResult) => {
+        const order: ChargingOrder | undefined = res.order;
+        if (!res.success || !order) {
+          this.showToast(res.message);
+          return;
+        }
+        AppStorage.setOrCreate<ChargingOrder | null>('currentOrder', order);
+        const param: NavParam = { id: order.id };
+        this.pathStack.pushPathByName('Charging', param);
+      })
+      .catch(() => {
+        this.showToast('启动充电失败，请重试');
+      })
+      .finally(() => {
+        this.starting = false;
+      });
   }
 
   private showToast(message: string): void {
@@ -237,10 +291,8 @@ export struct PileDetailPage {
       PrimaryButton({
         label: '立即充电',
         fullWidth: false,
-        onTap: () => {
-          const param: NavParam = { id: this.pileId };
-          this.pathStack.pushPathByName('Charging', param);
-        }
+        isDisabled: this.pile === undefined || this.pile.status !== 'IDLE',
+        onTap: () => this.confirmStart()
       })
     }
     .width('100%')

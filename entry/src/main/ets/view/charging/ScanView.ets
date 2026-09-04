@@ -1,9 +1,12 @@
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { NavParam } from '../../model/Types';
+import { ChargingPile, NavParam } from '../../model/Types';
+import { StationService } from '../../service/StationService';
 
 /**
- * 扫一扫（Story 9）：取景框 + 模拟识别，识别成功后进入充电流程。
+ * 扫一扫（Story 9）：取景框 + 模拟识别。
+ * 识别结果从 StationService 解析真实空闲桩（替代原硬编码 P-005），
+ * 成功后按文档路由跳「充电桩详情」，由详情页确认后启动充电。
  * 相机页保持深底风格，与其他页面区分是刻意设计。
  */
 @Component
@@ -15,6 +18,7 @@ export struct ScanView {
   @State scanOffset: number = 208;
   @State scanDone: boolean = false;
   @State pickedImage: string = '';
+  @State foundPile: ChargingPile | null = null;
   private readonly viewSize: number = 260;
 
   aboutToAppear(): void {
@@ -29,17 +33,29 @@ export struct ScanView {
     }
   }
 
+  /** 模拟识别：解析一个真实空闲桩 */
+  private recognize(): boolean {
+    const pile = StationService.getInstance().pickIdlePile();
+    if (!pile) {
+      this.showToast('暂无空闲充电桩，请稍后再试');
+      return false;
+    }
+    this.foundPile = pile;
+    this.scanDone = true;
+    this.showToast(`识别成功：${pile.code} ${pile.interfaceType}`);
+    return true;
+  }
+
   private startScan(): void {
     if (this.scanDone) {
       return;
     }
-    this.scanDone = true;
-    this.showToast('识别成功：P-005 直流快充');
+    this.recognize();
   }
 
   private manualInput(): void {
-    this.showToast('演示模式：已识别桩编号 P-005');
-    this.scanDone = true;
+    this.showToast('演示模式：自动识别桩编号');
+    this.recognize();
   }
 
   private pickFromAlbum(): void {
@@ -51,8 +67,7 @@ export struct ScanView {
       picker.select(options).then((result: photoAccessHelper.PhotoSelectResult) => {
         if (result.photoUris.length > 0) {
           this.pickedImage = result.photoUris[0];
-          this.scanDone = true;
-          this.showToast('识别成功：P-005 直流快充');
+          this.recognize();
         }
       }).catch((err: BusinessError) => {
         console.error(`pick image failed: code=${err.code} msg=${err.message}`);
@@ -64,9 +79,15 @@ export struct ScanView {
     }
   }
 
-  private goCharging(): void {
-    const param: NavParam = { id: 'P-005' };
-    this.pathStack.pushPathByName('Charging', param);
+  /** 识别成功 → 充电桩详情（文档路由：扫码后进入桩详情，再确认启动） */
+  private goPileDetail(): void {
+    const pile = this.foundPile;
+    if (!pile) {
+      this.showToast('未识别到充电桩');
+      return;
+    }
+    const param: NavParam = { id: pile.id };
+    this.pathStack.pushPathByName('PileDetail', param);
   }
 
   @Builder
@@ -215,11 +236,13 @@ export struct ScanView {
           }
         }
         Column({ space: 4 }) {
-          Text('P-005 · 直流快充')
+          Text(this.foundPile ? `${this.foundPile.code} · ${this.foundPile.interfaceType}` : '识别失败')
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.charge_title'))
-          Text('额定 120kW · 单价 ¥1.2/度 · 空闲中')
+          Text(this.foundPile ?
+            `额定 ${this.foundPile.powerKw}kW · ¥${this.foundPile.pricePerKwh.toFixed(2)}/度 · 空闲中` :
+            '未找到空闲充电桩，请重试')
             .fontSize(13)
             .fontColor($r('app.color.charge_secondary'))
             .width('100%')
@@ -236,10 +259,11 @@ export struct ScanView {
           .onClick(() => {
             this.scanDone = false;
             this.pickedImage = '';
+            this.foundPile = null;
           })
         Blank()
-        Button('开始充电')
-          .width(112)
+        Button('查看桩详情')
+          .width(124)
           .height(44)
           .fontSize(15)
           .fontWeight(FontWeight.Bold)
@@ -247,7 +271,7 @@ export struct ScanView {
           .backgroundColor($r('app.color.btn_primary'))
           .borderRadius(22)
           .onClick(() => {
-            this.goCharging();
+            this.goPileDetail();
           })
       }
       .width('100%')
