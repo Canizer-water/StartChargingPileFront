@@ -1,5 +1,6 @@
 import { ChargingPile, ChargingStation, NavParam } from '../../model/Types';
 import { StationService } from '../../service/StationService';
+import { pileMeta, stationMeta } from '../../model/MockData';
 
 /**
  * 二级页面：充电中心详情。
@@ -107,7 +108,7 @@ export struct StationDetailPage {
       Stack() {
         Circle({ width: 10, height: 10 }).fill($r('app.color.price_orange'))
       }
-      Text(`${station.occupied}个`)
+      Text(`${StationService.getInstance().occupiedCount(station.id)}个`)
         .fontSize(15)
         .fontWeight(FontWeight.Medium)
         .fontColor($r('app.color.text_primary'))
@@ -145,7 +146,7 @@ export struct StationDetailPage {
           Text('收费方式')
             .fontSize(13)
             .fontColor($r('app.color.text_secondary'))
-          Text(station.feeMode)
+          Text(stationMeta(station.id).feeMode)
             .fontSize(15)
             .fontColor($r('app.color.text_primary'))
             .margin({ top: 4 })
@@ -180,7 +181,7 @@ export struct StationDetailPage {
           Text('停车费')
             .fontSize(13)
             .fontColor($r('app.color.text_secondary'))
-          Text(station.parkingFee)
+          Text(stationMeta(station.id).parkingFee)
             .fontSize(15)
             .fontColor($r('app.color.text_primary'))
             .margin({ top: 4 })
@@ -200,7 +201,7 @@ export struct StationDetailPage {
               .fontSize(18)
               .fontColor([$r('app.color.primary_blue')])
               .margin({ left: 8 })
-              .onClick(() => this.showToast(`拨打 ${station.phone}`))
+              .onClick(() => this.showToast(`拨打 ${stationMeta(station.id).phone}`))
           }
           .margin({ top: 4 })
         }
@@ -247,7 +248,7 @@ export struct StationDetailPage {
       .width('100%')
       .alignItems(VerticalAlign.Center)
 
-      Text(`停车位号：${pile.slotCode}`)
+      Text(`停车位号：${pileMeta(pile.id).slotCode}`)
         .fontSize(13)
         .fontColor($r('app.color.text_secondary'))
         .width('100%')
@@ -264,7 +265,7 @@ export struct StationDetailPage {
           .padding({ left: 6, right: 6, top: 2, bottom: 2 })
           .borderRadius(3)
           .margin({ left: 4 })
-        Text(pile.ground)
+        Text(pileMeta(pile.id).ground)
           .fontSize(11)
           .fontColor($r('app.color.text_secondary'))
           .backgroundColor($r('app.color.chip_bg'))

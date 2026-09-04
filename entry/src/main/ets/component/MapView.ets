@@ -1,5 +1,6 @@
 import { ChargingStation } from '../model/Types';
 import { Theme } from '../common/Theme';
+import { stationMeta } from '../model/MockData';
 
 /**
  * 自绘风格地图（前端演示，无需地图 SDK / API Key）。
@@ -92,7 +93,7 @@ export struct MapView {
         .constraintSize({ maxWidth: 72 })
     }
     .alignItems(HorizontalAlign.Center)
-    .position({ x: `${station.mapX}%`, y: `${station.mapY}%` })
+    .position({ x: `${stationMeta(station.id).mapX}%`, y: `${stationMeta(station.id).mapY}%` })
   }
 
   /** “我的位置”标记 */

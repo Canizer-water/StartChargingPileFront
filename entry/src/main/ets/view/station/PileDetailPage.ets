@@ -1,5 +1,6 @@
 import { ChargingPile, NavParam } from '../../model/Types';
 import { StationService } from '../../service/StationService';
+import { pileMeta } from '../../model/MockData';
 import { AppTopBar } from '../../component/AppTopBar';
 import { PrimaryButton } from '../../component/PrimaryButton';
 
@@ -113,11 +114,11 @@ export struct PileDetailPage {
         Text('¥')
           .fontSize(14)
           .fontColor($r('app.color.price_orange'))
-        Text(`${pile.pricePerHour.toFixed(4)}`)
+        Text(`${pile.pricePerKwh.toFixed(2)}`)
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.price_orange'))
-        Text('元/时')
+        Text('元/度')
           .fontSize(13)
           .fontColor($r('app.color.price_orange'))
           .margin({ left: 1, bottom: 2 })
@@ -146,7 +147,7 @@ export struct PileDetailPage {
           .fontSize(13)
           .fontColor($r('app.color.text_secondary'))
           .margin({ bottom: 6 })
-        Text(pile.slotCode)
+        Text(pileMeta(pile.id).slotCode)
           .fontSize(15)
           .fontWeight(FontWeight.Medium)
           .fontColor($r('app.color.text_primary'))
@@ -154,7 +155,7 @@ export struct PileDetailPage {
           .fontSize(13)
           .fontColor($r('app.color.text_secondary'))
           .margin({ top: 40 })
-        Text(pile.floor)
+        Text(pileMeta(pile.id).floor)
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
           .fontColor($r('app.color.text_primary'))

@@ -1,5 +1,6 @@
 import { ChargingStation, NavParam } from '../model/Types';
 import { StationService } from '../service/StationService';
+import { stationMeta } from '../model/MockData';
 import { MapView } from '../component/MapView';
 import { AppTopBar } from '../component/AppTopBar';
 
@@ -78,7 +79,7 @@ export struct NearbyStationsPage {
             .fontSize(18)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.text_primary'))
-          ForEach(station.tags, (tag: string) => {
+          ForEach(stationMeta(station.id).tags, (tag: string) => {
             this.TagChip(tag,
               tag === '免停车费' ? $r('app.color.tag_green_bg') : $r('app.color.tag_blue_bg'),
               tag === '免停车费' ? $r('app.color.tag_green_text') : $r('app.color.tag_blue_text'))
@@ -167,7 +168,7 @@ export struct NearbyStationsPage {
             .fontColor($r('app.color.text_primary'))
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-          ForEach(station.tags, (tag: string) => {
+          ForEach(stationMeta(station.id).tags, (tag: string) => {
             this.TagChip(tag,
               tag === '免停车费' ? $r('app.color.tag_green_bg') : $r('app.color.tag_blue_bg'),
               tag === '免停车费' ? $r('app.color.tag_green_text') : $r('app.color.tag_blue_text'))
