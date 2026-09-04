@@ -1,8 +1,10 @@
 import { ChargingStation } from '../model/Types';
+import { Theme } from '../common/Theme';
 
 /**
  * 自绘风格地图（前端演示，无需地图 SDK / API Key）。
  * 使用 Canvas 绘制示意底图（道路、公园、水域），再用 Stack 叠加站点标记。
+ * 底图色统一取自 common/Theme（随系统亮/暗切换）。
  */
 
 @Component
@@ -10,12 +12,21 @@ export struct MapView {
   /** 需要在地图上展示的站点 */
   stations: ChargingStation[] = [];
 
+  @StorageLink('isDarkMode') @Watch('onDarkChange') isDark: boolean = false;
+
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
+
+  onDarkChange(): void {
+    if (this.context.width > 0) {
+      this.drawBase();
+    }
+  }
 
   /** 绘制示意底图 */
   private drawBase(): void {
     const ctx = this.context;
+    const p = Theme.palette(this.isDark);
     const w = ctx.width;
     const h = ctx.height;
     if (w <= 0 || h <= 0) {
@@ -23,27 +34,27 @@ export struct MapView {
     }
     ctx.clearRect(0, 0, w, h);
     // 底色
-    ctx.fillStyle = '#E8EDF3';
+    ctx.fillStyle = p.mapBg;
     ctx.fillRect(0, 0, w, h);
     // 楼宇色块
-    ctx.fillStyle = '#DEE4EC';
+    ctx.fillStyle = p.grid;
     ctx.fillRect(w * 0.03, h * 0.10, w * 0.20, h * 0.20);
     ctx.fillRect(w * 0.72, h * 0.08, w * 0.18, h * 0.16);
     ctx.fillRect(w * 0.55, h * 0.70, w * 0.16, h * 0.20);
     // 公园
-    ctx.fillStyle = '#CDE7D0';
+    ctx.fillStyle = p.mapPark;
     ctx.fillRect(w * 0.06, h * 0.52, w * 0.24, h * 0.30);
     // 水域
-    ctx.fillStyle = '#C6E0F1';
+    ctx.fillStyle = p.mapWater;
     ctx.fillRect(w * 0.74, h * 0.58, w * 0.22, h * 0.28);
-    // 道路（白底）
-    ctx.fillStyle = '#FFFFFF';
+    // 道路
+    ctx.fillStyle = p.mapRoad;
     ctx.fillRect(0, h * 0.45, w, h * 0.075);     // 横向主干道
     ctx.fillRect(w * 0.47, 0, w * 0.055, h);     // 纵向主干道
     ctx.fillRect(0, h * 0.86, w, h * 0.045);     // 横向次干道
     ctx.fillRect(w * 0.12, 0, w * 0.03, h);      // 纵向次干道
     // 道路中线
-    ctx.strokeStyle = '#D7DCE3';
+    ctx.strokeStyle = p.divider;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, h * 0.4875);
@@ -90,7 +101,7 @@ export struct MapView {
     Column() {
       Stack() {
         Circle({ width: 26, height: 26 })
-          .fill('rgba(47,123,246,0.22)')
+          .fill('#38' + Theme.palette(this.isDark).brand.substring(1))
         Circle({ width: 14, height: 14 })
           .fill($r('app.color.map_marker_you'))
           .stroke(Color.White)

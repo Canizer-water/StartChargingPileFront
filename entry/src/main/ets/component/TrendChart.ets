@@ -1,7 +1,10 @@
+import { Theme } from '../common/Theme';
+
 /**
  * 近7天充电量趋势图（ArkUI Canvas 自绘）
  * - 蓝色折线 + 蓝色渐变面积
  * - 点击/滑动显示悬浮提示：日期 + 充电量
+ * - 颜色统一取自 common/Theme（随系统亮/暗切换）
  */
 @Component
 export struct TrendChart {
@@ -9,6 +12,13 @@ export struct TrendChart {
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
 
   @State selectedIndex: number = -1;
+  @StorageLink('isDarkMode') @Watch('onDarkChange') isDark: boolean = false;
+
+  onDarkChange(): void {
+    if (this.context.width > 0) {
+      this.draw();
+    }
+  }
 
   // Mock 数据：7 天累计 168.50 度
   private dates: string[] = ['2026-08-27', '2026-08-28', '2026-08-29', '2026-08-30', '2026-08-31', '2026-09-01', '2026-09-02'];
@@ -69,6 +79,7 @@ export struct TrendChart {
 
   private draw(): void {
     const ctx = this.context;
+    const p = Theme.palette(this.isDark);
     const w = ctx.width;
     const h = ctx.height;
     ctx.clearRect(0, 0, w, h);
@@ -87,19 +98,19 @@ export struct TrendChart {
     for (let i = 0; i <= 4; i++) {
       const value = i * 25;
       const y = this.yOf(value);
-      ctx.strokeStyle = value === 0 ? '#F2F6FB' : '#E9EEF4';
+      ctx.strokeStyle = value === 0 ? p.grid : p.divider;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(left, y);
       ctx.lineTo(right, y);
       ctx.stroke();
-      ctx.fillStyle = '#98A2B3';
+      ctx.fillStyle = p.textMuted;
       ctx.fillText(`${value}`, left - 7, y + 3);
     }
 
     // X 轴日期
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#98A2B3';
+    ctx.fillStyle = p.textMuted;
     for (let i = 0; i < this.labels.length; i++) {
       const x = this.xOf(i);
       ctx.fillText(this.labels[i], x, bottom + 14);
@@ -113,8 +124,8 @@ export struct TrendChart {
 
     // 渐变面积填充
     const gradient = ctx.createLinearGradient(0, top, 0, bottom);
-    gradient.addColorStop(0, '#4D2196F3');
-    gradient.addColorStop(1, '#062196F3');
+    gradient.addColorStop(0, '#4D' + p.brand.substring(1));
+    gradient.addColorStop(1, '#06' + p.brand.substring(1));
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < points.length; i++) {
@@ -137,14 +148,14 @@ export struct TrendChart {
       }
     }
     ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-    ctx.strokeStyle = '#2196F3';
+    ctx.strokeStyle = p.brand;
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // 选中态：竖线 + 高亮点 + 悬浮提示
     if (this.selectedIndex >= 0 && this.selectedIndex < points.length) {
       const point = points[this.selectedIndex];
-      ctx.strokeStyle = '#BBDEFB';
+      ctx.strokeStyle = p.brandLight;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(point.x, top);
@@ -153,11 +164,11 @@ export struct TrendChart {
 
       ctx.beginPath();
       ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = p.cardBg;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = '#2196F3';
+      ctx.fillStyle = p.brand;
       ctx.fill();
 
       const date = this.dates[this.selectedIndex];
@@ -182,7 +193,7 @@ export struct TrendChart {
       if (boxY + boxH > h - 4) {
         boxY = h - boxH - 4;
       }
-      ctx.fillStyle = '#2196F3';
+      ctx.fillStyle = p.brand;
       ctx.fillRect(boxX, boxY, boxW, boxH);
       ctx.fillStyle = '#FFFFFF';
       ctx.fillText(date, boxX + 10, boxY + 14);
@@ -194,7 +205,7 @@ export struct TrendChart {
     Canvas(this.context)
       .width('100%')
       .height(190)
-      .backgroundColor(Color.White)
+      .backgroundColor(Theme.palette(this.isDark).cardBg)
       .onReady(() => {
         this.draw();
       })

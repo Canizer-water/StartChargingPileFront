@@ -9,7 +9,7 @@
 @Component
 export struct LineIcon {
   @Prop kind: string = 'user';
-  @Prop color: string = '#1450B8';
+  @Prop color: string = '#5B8CE7';
 
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
