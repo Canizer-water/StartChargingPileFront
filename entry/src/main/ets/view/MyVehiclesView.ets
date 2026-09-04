@@ -1,3 +1,5 @@
+import { AppTopBar } from '../component/AppTopBar';
+
 /**
  * 我的爱车：车辆卡列表 + 自动支付开关。
  */
@@ -28,28 +30,6 @@ export struct MyVehiclesView {
   }
 
   @Builder
-  NavBar(title: string) {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .margin({ left: 4 })
-        .onClick(() => this.pathStack.pop())
-      Blank()
-      Text(title)
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-      Blank()
-      // 占位保证标题居中
-      Row().width(24)
-    }
-    .width('100%')
-    .height(44)
-    .padding({ left: 12, right: 12 })
-  }
-
-  @Builder
   VehicleCard(item: VehicleItem) {
     Row() {
       Stack() {
@@ -60,8 +40,7 @@ export struct MyVehiclesView {
       .width(52)
       .height(52)
       .borderRadius(26)
-      .backgroundColor(Color.White)
-      .border({ width: 1, color: $r('app.color.border') })
+      .backgroundColor($r('app.color.tint_blue'))
 
       Column() {
         Row() {
@@ -122,7 +101,7 @@ export struct MyVehiclesView {
 
   build() {
     Column() {
-      this.NavBar('我的爱车')
+      AppTopBar({ title: '我的爱车', pathStack: this.pathStack })
 
       Scroll() {
         Column() {

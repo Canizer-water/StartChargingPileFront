@@ -1,3 +1,6 @@
+import { AppTopBar } from '../component/AppTopBar';
+import { PrimaryButton } from '../component/PrimaryButton';
+
 /**
  * 充值：金额选择 + 自定义金额 + 支付方式，联调 AppStorage 余额。
  */
@@ -37,27 +40,6 @@ export struct RechargeView {
   }
 
   @Builder
-  NavBar(title: string) {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .margin({ left: 4 })
-        .onClick(() => this.pathStack.pop())
-      Blank()
-      Text(title)
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-      Blank()
-      Row().width(24)
-    }
-    .width('100%')
-    .height(44)
-    .padding({ left: 12, right: 12 })
-  }
-
-  @Builder
   BalanceCard() {
     Column() {
       Text('账户余额(元)')
@@ -76,7 +58,7 @@ export struct RechargeView {
     .borderRadius(12)
     .linearGradient({
       angle: 135,
-      colors: [[0x3FC98A, 0.0], [0x1FA869, 1.0]]
+      colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.6], [$r('app.color.brand_deep'), 1.0]]
     })
   }
 
@@ -148,12 +130,12 @@ export struct RechargeView {
           Stack() {
             SymbolGlyph(method.icon)
               .fontSize(18)
-              .fontColor([Color.White])
+              .fontColor([$r('app.color.btn_primary')])
           }
           .width(32)
           .height(32)
           .borderRadius(8)
-          .backgroundColor($r('app.color.btn_primary'))
+          .backgroundColor($r('app.color.tint_blue'))
 
           Text(method.name)
             .fontSize(15)
@@ -182,7 +164,7 @@ export struct RechargeView {
 
   build() {
     Column() {
-      this.NavBar('充值')
+      AppTopBar({ title: '充值', pathStack: this.pathStack })
 
       Scroll() {
         Column() {
@@ -203,20 +185,18 @@ export struct RechargeView {
       .scrollBar(BarState.Off)
       .align(Alignment.Top)
 
-      Button('立即充值 ' + this.currentAmount() + ' 元')
-        .width('100%')
-        .height(50)
-        .fontSize(17)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White)
-        .backgroundColor($r('app.color.btn_primary'))
-        .borderRadius(25)
-        .margin({ left: 16, right: 16, bottom: 20 })
-        .onClick(() => {
-          this.walletBalance = this.walletBalance + this.currentAmount();
-          this.showToast('充值成功，已到账 ' + this.currentAmount() + ' 元');
-          this.pathStack.pop();
+      Column() {
+        PrimaryButton({
+          label: '立即充值 ' + this.currentAmount() + ' 元',
+          onTap: () => {
+            this.walletBalance = this.walletBalance + this.currentAmount();
+            this.showToast('充值成功，已到账 ' + this.currentAmount() + ' 元');
+            this.pathStack.pop();
+          }
         })
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16, bottom: 20 })
     }
     .width('100%')
     .height('100%')

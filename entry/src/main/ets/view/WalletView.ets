@@ -1,4 +1,5 @@
 import { NavParam } from '../model/Types';
+import { AppTopBar } from '../component/AppTopBar';
 
 /**
  * 我的钱包：余额 + 充值入口 + 发票入口。
@@ -25,30 +26,6 @@ export struct WalletView {
   }
 
   @Builder
-  NavBar(title: string) {
-    Column() {
-      Row() {
-        SymbolGlyph($r('sys.symbol.chevron_left'))
-          .fontSize(24)
-          .fontColor([$r('app.color.text_primary')])
-          .margin({ left: 4 })
-          .onClick(() => this.pathStack.pop())
-        Blank()
-      }
-      .width('100%')
-      .height(44)
-      .padding({ left: 12, right: 16 })
-
-      Text(title)
-        .fontSize(26)
-        .fontWeight(FontWeight.Bold)
-        .fontColor($r('app.color.text_primary'))
-        .margin({ left: 16, top: 10 })
-    }
-    .width('100%')
-  }
-
-  @Builder
   BalanceCard() {
     Column() {
       Text('账户余额(元)')
@@ -57,7 +34,7 @@ export struct WalletView {
         .opacity(0.92)
 
       Text(this.walletBalance.toFixed(2))
-        .fontSize(46)
+        .fontSize(40)
         .fontWeight(FontWeight.Bold)
         .fontColor(Color.White)
         .letterSpacing(1)
@@ -81,7 +58,7 @@ export struct WalletView {
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
           .fontColor(Color.White)
-          .backgroundColor($r('app.color.primary_light'))
+          .backgroundColor('rgba(255,255,255,0.22)')
           .height(34)
           .borderRadius(17)
           .padding({ left: 22, right: 22 })
@@ -95,7 +72,7 @@ export struct WalletView {
     .borderRadius(12)
     .linearGradient({
       angle: 135,
-      colors: [[0x3FC98A, 0.0], [0x1FA869, 1.0]]
+      colors: [[$r('app.color.primary_light'), 0.0], [$r('app.color.btn_primary'), 0.6], [$r('app.color.brand_deep'), 1.0]]
     })
   }
 
@@ -105,12 +82,12 @@ export struct WalletView {
       Stack() {
         SymbolGlyph(icon)
           .fontSize(18)
-          .fontColor([Color.White])
+          .fontColor([$r('app.color.btn_primary')])
       }
       .width(36)
       .height(36)
       .borderRadius(8)
-      .backgroundColor($r('app.color.btn_primary'))
+      .backgroundColor($r('app.color.tint_blue'))
 
       Column() {
         Text(title)
@@ -158,7 +135,7 @@ export struct WalletView {
 
   build() {
     Column() {
-      this.NavBar('我的钱包')
+      AppTopBar({ title: '我的钱包', pathStack: this.pathStack })
 
       Scroll() {
         Column() {

@@ -1,4 +1,5 @@
 import { NavParam } from '../model/Types';
+import { AppTopBar } from '../component/AppTopBar';
 
 /**
  * 历史订单：状态筛选 tab + 订单卡。
@@ -9,7 +10,6 @@ interface OrderItem {
   time: string;
   amount: string;
   status: string;
-  statusColor: string;
 }
 
 @Component
@@ -20,10 +20,10 @@ export struct OrderHistoryView {
   private tabs: string[] = ['全部', '进行中', '已完成', '已取消'];
 
   @State orders: OrderItem[] = [
-    { station: '东方明珠充电站 · 02号桩', time: '09-18 14:30', amount: '36.50', status: '已完成', statusColor: '#5B8CE7' },
-    { station: '世纪公园快充站 · 05号桩', time: '09-18 10:12', amount: '28.00', status: '进行中', statusColor: '#ED823E' },
-    { station: '虹桥枢纽充电站 · 01号桩', time: '09-17 20:45', amount: '52.80', status: '已完成', statusColor: '#5B8CE7' },
-    { station: '陆家嘴慢充站 · 03号桩', time: '09-17 08:05', amount: '15.20', status: '已取消', statusColor: '#9AA2AD' }
+    { station: '东方明珠充电站 · 02号桩', time: '09-18 14:30', amount: '36.50', status: '已完成' },
+    { station: '世纪公园快充站 · 05号桩', time: '09-18 10:12', amount: '28.00', status: '进行中' },
+    { station: '虹桥枢纽充电站 · 01号桩', time: '09-17 20:45', amount: '52.80', status: '已完成' },
+    { station: '陆家嘴慢充站 · 03号桩', time: '09-17 08:05', amount: '15.20', status: '已取消' }
   ];
 
   private showToast(message: string): void {
@@ -32,6 +32,17 @@ export struct OrderHistoryView {
     } catch (err) {
       console.error(`showToast failed: ${JSON.stringify(err)}`);
     }
+  }
+
+  /** 订单状态胶囊底色：进行中橙、已取消灰、其余品牌蓝 */
+  private statusBg(status: string): ResourceColor {
+    if (status === '进行中') {
+      return $r('app.color.accent');
+    }
+    if (status === '已取消') {
+      return $r('app.color.pile_offline');
+    }
+    return $r('app.color.btn_primary');
   }
 
   private getVisibleOrders(): OrderItem[] {
@@ -45,27 +56,6 @@ export struct OrderHistoryView {
   private go(route: string): void {
     const param: NavParam = { id: '' };
     this.pathStack.pushPathByName(route, param);
-  }
-
-  @Builder
-  NavBar(title: string) {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .margin({ left: 4 })
-        .onClick(() => this.pathStack.pop())
-      Blank()
-      Text(title)
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-      Blank()
-      Row().width(24)
-    }
-    .width('100%')
-    .height(44)
-    .padding({ left: 12, right: 12 })
   }
 
   @Builder
@@ -100,8 +90,8 @@ export struct OrderHistoryView {
           .layoutWeight(1)
         Text(item.status)
           .fontSize(13)
-          .fontColor('#FFFFFFFF')
-          .backgroundColor(item.statusColor)
+          .fontColor(Color.White)
+          .backgroundColor(this.statusBg(item.status))
           .borderRadius(10)
           .padding({ left: 10, right: 10, top: 4, bottom: 4 })
       }
@@ -168,7 +158,7 @@ export struct OrderHistoryView {
 
   build() {
     Column() {
-      this.NavBar('历史订单')
+      AppTopBar({ title: '历史订单', pathStack: this.pathStack })
       this.FilterBar()
 
       Scroll() {

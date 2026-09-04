@@ -1,3 +1,6 @@
+import { AppTopBar } from '../component/AppTopBar';
+import { PrimaryButton } from '../component/PrimaryButton';
+
 /**
  * 电子发票：勾选订单 + 抬头类型 + 邮箱提交。
  */
@@ -67,27 +70,6 @@ export struct InvoiceView {
     }
     this.showToast('开票申请已提交，电子发票将发送至邮箱');
     this.pathStack.pop();
-  }
-
-  @Builder
-  NavBar(title: string) {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.text_primary')])
-        .margin({ left: 4 })
-        .onClick(() => this.pathStack.pop())
-      Blank()
-      Text(title)
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.text_primary'))
-      Blank()
-      Row().width(24)
-    }
-    .width('100%')
-    .height(44)
-    .padding({ left: 12, right: 12 })
   }
 
   @Builder
@@ -261,7 +243,7 @@ export struct InvoiceView {
 
   build() {
     Column() {
-      this.NavBar('开电子发票')
+      AppTopBar({ title: '开电子发票', pathStack: this.pathStack })
 
       Scroll() {
         Column() {
@@ -282,18 +264,11 @@ export struct InvoiceView {
       .scrollBar(BarState.Off)
       .align(Alignment.Top)
 
-      Button('提交开票申请')
-        .width('100%')
-        .height(50)
-        .fontSize(17)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White)
-        .backgroundColor($r('app.color.btn_primary'))
-        .borderRadius(25)
-        .margin({ left: 16, right: 16, bottom: 20 })
-        .onClick(() => {
-          this.submit();
-        })
+      Column() {
+        PrimaryButton({ label: '提交开票申请', onTap: () => this.submit() })
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16, bottom: 20 })
     }
     .width('100%')
     .height('100%')
