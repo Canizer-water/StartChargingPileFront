@@ -1,3 +1,7 @@
+import { common } from '@kit.AbilityKit';
+import { AuthService, AuthResult, LoginRequest, RememberedAccount } from '../service/AuthService';
+import { UserAccount } from '../model/Types';
+
 @Entry
 @Component
 struct LoginPage {
@@ -5,13 +9,26 @@ struct LoginPage {
   @State password: string = '';
   @State showPassword: boolean = false;
   @State rememberPassword: boolean = false;
+  @State logging: boolean = false;
 
   aboutToAppear(): void {
-    // 注册成功回填手机号（Story 1）
-    const phone = AppStorage.get<string>('registeredPhone');
-    if (phone && phone !== '') {
-      this.username = phone;
-    }
+    // 回填：优先「记住密码」的账号，其次注册成功后的手机号（Story 1/2）
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    AuthService.getInstance().init(ctx).then(async () => {
+      const remembered: RememberedAccount | null = await AuthService.getInstance().getRemembered();
+      if (remembered) {
+        this.username = remembered.username;
+        this.password = remembered.password;
+        this.rememberPassword = true;
+        return;
+      }
+      const phone = AppStorage.get<string>('registeredPhone');
+      if (phone && phone !== '') {
+        this.username = phone;
+      }
+    }).catch(() => {
+      // 本地存储不可用时保持现状（仅注册回填）
+    });
   }
 
   private showToast(message: string): void {
@@ -23,7 +40,11 @@ struct LoginPage {
   }
 
   private handleLogin(): void {
-    if (this.username.trim() === '') {
+    if (this.logging) {
+      return;
+    }
+    const username = this.username.trim();
+    if (username === '') {
       this.showToast('请输入手机号 / 用户名');
       return;
     }
@@ -31,12 +52,26 @@ struct LoginPage {
       this.showToast('请输入密码');
       return;
     }
-    // 前端演示：暂未对接后端，登录成功后进入主框架
-    try {
-      this.getUIContext().getRouter().replaceUrl({ url: 'pages/Index' });
-    } catch (err) {
-      this.showToast('跳转失败，请重试');
-    }
+    this.logging = true;
+    const req: LoginRequest = { username: username, password: this.password, remember: this.rememberPassword };
+    AuthService.getInstance().login(req).then((result: AuthResult) => {
+      if (!result.success || !result.user) {
+        this.showToast(result.message);
+        return;
+      }
+      const user: UserAccount = result.user;
+      AppStorage.setOrCreate('currentUser', user);
+      AppStorage.setOrCreate('isLoggedIn', true);
+      try {
+        this.getUIContext().getRouter().replaceUrl({ url: 'pages/Index' });
+      } catch (err) {
+        this.showToast('跳转失败，请重试');
+      }
+    }).catch(() => {
+      this.showToast('登录失败，请重试');
+    }).finally(() => {
+      this.logging = false;
+    });
   }
 
   @Builder

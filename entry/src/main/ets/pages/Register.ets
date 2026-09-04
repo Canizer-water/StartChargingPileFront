@@ -1,10 +1,13 @@
+import { common } from '@kit.AbilityKit';
 import { AppTopBar } from '../component/AppTopBar';
 import { PrimaryButton } from '../component/PrimaryButton';
+import { AuthService, AuthResult, RegisterRequest } from '../service/AuthService';
 
 /**
  * 注册页（Story 1）。
  * 字段：手机号 / 密码 / 确认密码 + 用户协议勾选。
- * 前端演示：注册成功后记录手机号到 AppStorage，供登录页回填。
+ * 唯一性校验走 AuthService（本地 preferences，形状同 POST /auth/register）。
+ * 注册成功后记录手机号到 AppStorage，供登录页回填。
  */
 
 @Entry
@@ -16,6 +19,7 @@ struct RegisterPage {
   @State isPwdVisible: boolean = false;
   @State isConfirmPwdVisible: boolean = false;
   @State isAgreed: boolean = false;
+  @State submitting: boolean = false;
 
   private showToast(message: string): void {
     try {
@@ -47,16 +51,32 @@ struct RegisterPage {
 
   private handleRegister(): void {
     const err = this.validate();
-    if (err !== '') {
+    if (err !== '' || this.submitting) {
       this.showToast(err);
       return;
     }
-    // 前端演示：暂未对接后端，仅模拟注册
-    AppStorage.setOrCreate('registeredPhone', this.phone);
-    this.showToast('注册成功');
-    setTimeout(() => {
-      this.goBack();
-    }, 800);
+    this.submitting = true;
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    const req: RegisterRequest = { username: this.phone, password: this.password };
+    AuthService.getInstance().init(ctx)
+      .then(() => AuthService.getInstance().register(req))
+      .then((result: AuthResult) => {
+        if (!result.success) {
+          this.showToast(result.message);
+          return;
+        }
+        AppStorage.setOrCreate('registeredPhone', this.phone);
+        this.showToast('注册成功');
+        setTimeout(() => {
+          this.goBack();
+        }, 800);
+      })
+      .catch(() => {
+        this.showToast('注册失败，请重试');
+      })
+      .finally(() => {
+        this.submitting = false;
+      });
   }
 
   private togglePwdVisible(isConfirm: boolean): void {

@@ -1,6 +1,8 @@
 import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { AuthService } from '../service/AuthService';
+import { UserAccount } from '../model/Types';
 
 const DOMAIN = 0x0000;
 
@@ -30,7 +32,24 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    windowStage.loadContent('pages/Login', (err) => {
+    // 会话门禁：先恢复本地登录态，再决定进主框架还是登录页
+    AuthService.getInstance().init(this.context)
+      .then(async () => {
+        const user: UserAccount | null = await AuthService.getInstance().restoreSession();
+        if (user) {
+          AppStorage.setOrCreate('currentUser', user);
+          AppStorage.setOrCreate('isLoggedIn', true);
+        }
+        this.loadStartPage(windowStage, user ? 'pages/Index' : 'pages/Login');
+      })
+      .catch((err: Error) => {
+        hilog.error(DOMAIN, 'testTag', 'Session restore failed: %{public}s', JSON.stringify(err));
+        this.loadStartPage(windowStage, 'pages/Login');
+      });
+  }
+
+  private loadStartPage(windowStage: window.WindowStage, page: string): void {
+    windowStage.loadContent(page, (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
