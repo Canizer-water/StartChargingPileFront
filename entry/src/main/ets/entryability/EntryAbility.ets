@@ -1,4 +1,4 @@
-import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 
@@ -11,7 +11,15 @@ export default class EntryAbility extends UIAbility {
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
+    // Canvas 自绘组件按此标志在 Theme.LIGHT / Theme.DARK 间取色
+    AppStorage.setOrCreate('isDarkMode',
+      this.context.config.colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+  }
+
+  onConfigurationUpdate(newConfig: Configuration): void {
+    AppStorage.setOrCreate('isDarkMode',
+      newConfig.colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
   }
 
   onDestroy(): void {
