@@ -1,8 +1,15 @@
-import { router } from '@kit.ArkUI';
+import { NavParam } from '../../model/Types';
+import { AppTopBar } from '../../component/AppTopBar';
+import { InfoRow } from '../../component/InfoRow';
+import { PrimaryButton } from '../../component/PrimaryButton';
 
-@Entry
+/**
+ * 充电中（Story 11/12）：实时数据模拟刷新 + 结束充电。
+ */
 @Component
-struct ChargingPage {
+export struct ChargingPage {
+  pathStack: NavPathStack = new NavPathStack();
+
   @State progress: number = 68;
   @State elapsed: number = 1860;
   private timerId: number = -1;
@@ -35,28 +42,9 @@ struct ChargingPage {
     return this.elapsed * 78.6 / 3600;
   }
 
-  @Builder
-  TitleBar() {
-    Row() {
-      SymbolGlyph($r('sys.symbol.chevron_left'))
-        .fontSize(24)
-        .fontColor([$r('app.color.charge_secondary')])
-        .onClick(() => {
-          router.back();
-        })
-      Blank()
-      Text('充电中')
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.charge_title'))
-      Blank()
-      Row()
-        .width(24)
-        .height(24)
-    }
-    .width('100%')
-    .height(56)
-    .padding({ left: 16, right: 16 })
+  private finishCharging(): void {
+    const param: NavParam = { id: 'P-005' };
+    this.pathStack.pushPathByName('ChargeComplete', param);
   }
 
   @Builder
@@ -64,15 +52,15 @@ struct ChargingPage {
     Column({ space: 4 }) {
       Text(label)
         .fontSize(12)
-        .fontColor($r('app.color.charge_secondary'))
+        .fontColor($r('app.color.text_secondary'))
       Row() {
         Text(value)
           .fontSize(24)
           .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.login_primary'))
+          .fontColor($r('app.color.btn_primary'))
         Text(unit)
           .fontSize(12)
-          .fontColor($r('app.color.charge_secondary'))
+          .fontColor($r('app.color.text_secondary'))
           .margin({ left: 3, bottom: 3 })
       }
       .alignItems(VerticalAlign.Bottom)
@@ -88,7 +76,7 @@ struct ChargingPage {
         Progress({ value: this.progress, total: 100, type: ProgressType.Ring })
           .width(180)
           .height(180)
-          .color($r('app.color.login_primary'))
+          .color($r('app.color.btn_primary'))
           .backgroundColor($r('app.color.charge_ring_bg'))
           .style({ strokeWidth: 14 })
 
@@ -96,17 +84,17 @@ struct ChargingPage {
           Text(`${Math.floor(this.progress)}%`)
             .fontSize(40)
             .fontWeight(FontWeight.Bold)
-            .fontColor($r('app.color.login_primary'))
+            .fontColor($r('app.color.btn_primary'))
           Text('充电进度')
             .fontSize(13)
-            .fontColor($r('app.color.charge_secondary'))
+            .fontColor($r('app.color.text_secondary'))
         }
       }
 
       Text('正在充电 · 直流快充')
         .fontSize(13)
         .fontWeight(FontWeight.Medium)
-        .fontColor($r('app.color.login_primary'))
+        .fontColor($r('app.color.btn_primary'))
         .padding({ left: 14, right: 14, top: 6, bottom: 6 })
         .backgroundColor($r('app.color.charge_tint_bg'))
         .borderRadius(12)
@@ -133,77 +121,58 @@ struct ChargingPage {
     .alignItems(HorizontalAlign.Center)
     .width('100%')
     .padding(24)
-    .backgroundColor($r('app.color.charge_card_bg'))
+    .backgroundColor($r('app.color.app_card'))
     .borderRadius(12)
     .border({ width: 1, color: $r('app.color.divider') })
   }
 
   @Builder
-  InfoRow(label: string, value: string, valueColor?: ResourceColor) {
-    Row() {
-      Text(label)
-        .fontSize(14)
-        .fontColor($r('app.color.charge_secondary'))
-      Blank()
-      Text(value)
-        .fontSize(15)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(valueColor ?? $r('app.color.charge_title'))
-    }
-    .width('100%')
-    .height(48)
-  }
-
-  @Builder
-  InfoCard() {
+  InfoCardContent() {
     Column({ space: 8 }) {
-      this.InfoRow('充电桩', 'P-005')
+      InfoRow({ label: '充电桩', value: 'P-005' })
       Divider().color($r('app.color.divider'))
-      this.InfoRow('停车位', 'A-15')
+      InfoRow({ label: '停车位', value: 'A-15' })
       Divider().color($r('app.color.divider'))
-      this.InfoRow('当前电压 / 电流', '750 V / 105 A')
+      InfoRow({ label: '当前电压 / 电流', value: '750 V / 105 A' })
       Divider().color($r('app.color.divider'))
-      this.InfoRow('充电时长', this.formatTime(this.elapsed))
+      InfoRow({ label: '充电时长', value: this.formatTime(this.elapsed) })
       Divider().color($r('app.color.divider'))
-      this.InfoRow('消费金额', `¥${(this.getKwh() * 1.2).toFixed(2)}`, $r('app.color.accent'))
+      InfoRow({ label: '消费金额', value: `¥${(this.getKwh() * 1.2).toFixed(2)}`, valueColor: $r('app.color.accent') })
     }
     .width('100%')
-    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-    .backgroundColor($r('app.color.charge_card_bg'))
-    .borderRadius(12)
-    .border({ width: 1, color: $r('app.color.divider') })
   }
 
   build() {
     Column() {
-      this.TitleBar()
+      AppTopBar({ title: '充电中', pathStack: this.pathStack })
 
       Scroll() {
         Column({ space: 16 }) {
           this.StatusCard()
-          this.InfoCard()
 
-          Button('结束充电')
-            .width('100%')
-            .height(48)
-            .fontSize(16)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(Color.White)
-            .backgroundColor($r('app.color.accent'))
-            .borderRadius(8)
-            .margin({ top: 8, bottom: 24 })
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/ChargeCompletePage' });
-            })
+          Column() {
+            this.InfoCardContent()
+          }
+          .width('100%')
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .backgroundColor($r('app.color.app_card'))
+          .borderRadius(12)
+          .border({ width: 1, color: $r('app.color.divider') })
+
+          PrimaryButton({
+            label: '结束充电',
+            color: $r('app.color.accent'),
+            onTap: () => this.finishCharging()
+          })
         }
         .width('100%')
-        .padding({ left: 16, right: 16, top: 8 })
+        .padding({ left: 16, right: 16, top: 8, bottom: 24 })
       }
       .layoutWeight(1)
       .scrollBar(BarState.Off)
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(Color.White)
+    .backgroundColor($r('app.color.app_bg'))
   }
 }

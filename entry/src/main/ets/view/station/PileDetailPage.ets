@@ -1,4 +1,4 @@
-import { ChargingPile } from '../../model/Types';
+import { ChargingPile, NavParam } from '../../model/Types';
 import { StationService } from '../../service/StationService';
 import { AppTopBar } from '../../component/AppTopBar';
 import { PrimaryButton } from '../../component/PrimaryButton';
@@ -236,7 +236,10 @@ export struct PileDetailPage {
       PrimaryButton({
         label: '立即充电',
         fullWidth: false,
-        onTap: () => this.showToast('已选桩，即将开始充电（Story 10 确认弹窗待实现）')
+        onTap: () => {
+          const param: NavParam = { id: this.pileId };
+          this.pathStack.pushPathByName('Charging', param);
+        }
       })
     }
     .width('100%')
@@ -247,32 +250,29 @@ export struct PileDetailPage {
   }
 
   build() {
-    NavDestination() {
-      Column() {
-        AppTopBar({ title: '电枪详情', pathStack: this.pathStack })
+    Column() {
+      AppTopBar({ title: '电枪详情', pathStack: this.pathStack })
 
-        Scroll() {
-          Column() {
-            if (this.pile) {
-              this.PlateInput()
-              this.InfoBar(this.pile)
-              this.Diagram(this.pile)
-            }
+      Scroll() {
+        Column() {
+          if (this.pile) {
+            this.PlateInput()
+            this.InfoBar(this.pile)
+            this.Diagram(this.pile)
           }
-          .padding({ left: 16, right: 16, bottom: 16 })
         }
-        .width('100%')
-        .layoutWeight(1)
-        .scrollBar(BarState.Off)
-
-        if (this.pile) {
-          this.BottomBar()
-        }
+        .padding({ left: 16, right: 16, bottom: 16 })
       }
       .width('100%')
-      .height('100%')
-      .backgroundColor($r('app.color.app_bg'))
+      .layoutWeight(1)
+      .scrollBar(BarState.Off)
+
+      if (this.pile) {
+        this.BottomBar()
+      }
     }
-    .hideTitleBar(true)
+    .width('100%')
+    .height('100%')
+    .backgroundColor($r('app.color.app_bg'))
   }
 }

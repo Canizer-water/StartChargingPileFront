@@ -1,10 +1,15 @@
-import { router } from '@kit.ArkUI';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { NavParam } from '../../model/Types';
 
-@Entry
+/**
+ * 扫一扫（Story 9）：取景框 + 模拟识别，识别成功后进入充电流程。
+ * 相机页保持深底风格，与其他页面区分是刻意设计。
+ */
 @Component
-struct ScanView {
+export struct ScanView {
+  pathStack: NavPathStack = new NavPathStack();
+
   @State scanOffset: number = 208;
   @State scanDone: boolean = false;
   @State pickedImage: string = '';
@@ -57,6 +62,11 @@ struct ScanView {
     }
   }
 
+  private goCharging(): void {
+    const param: NavParam = { id: 'P-005' };
+    this.pathStack.pushPathByName('Charging', param);
+  }
+
   @Builder
   TitleBar() {
     Row() {
@@ -64,12 +74,12 @@ struct ScanView {
         .fontSize(24)
         .fontColor([$r('app.color.scan_hint')])
         .onClick(() => {
-          router.back();
+          this.pathStack.pop();
         })
       Blank()
       Text('扫一扫')
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
+        .fontSize(17)
+        .fontWeight(FontWeight.Medium)
         .fontColor($r('app.color.scan_hint'))
       Blank()
       Row()
@@ -77,7 +87,7 @@ struct ScanView {
         .height(24)
     }
     .width('100%')
-    .height(56)
+    .height(48)
     .padding({ left: 16, right: 16 })
   }
 
@@ -195,7 +205,7 @@ struct ScanView {
           } else {
             SymbolGlyph($r('sys.symbol.bolt_fill'))
               .fontSize(26)
-              .fontColor([$r('app.color.login_primary')])
+              .fontColor([$r('app.color.btn_primary')])
           }
         }
         Column({ space: 4 }) {
@@ -228,10 +238,10 @@ struct ScanView {
           .fontSize(15)
           .fontWeight(FontWeight.Bold)
           .fontColor(Color.White)
-          .backgroundColor($r('app.color.login_primary'))
+          .backgroundColor($r('app.color.btn_primary'))
           .borderRadius(22)
           .onClick(() => {
-            router.pushUrl({ url: 'pages/ChargingPage' });
+            this.goCharging();
           })
       }
       .width('100%')
@@ -239,8 +249,7 @@ struct ScanView {
     .width('100%')
     .padding(18)
     .backgroundColor($r('app.color.scan_result_bg'))
-    .borderRadius(16)
-    .shadow({ radius: 20, color: 0x22000000, offsetY: 6 })
+    .borderRadius(12)
   }
 
   @Builder

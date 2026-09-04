@@ -17,6 +17,7 @@ export struct HomeView {
   pathStack: NavPathStack = new NavPathStack();
 
   private homeItems: HomeItem[] = [
+    { icon: $r('sys.symbol.qrcode'), title: '扫码充电', desc: '对准桩身二维码启动充电', route: 'Scan' },
     { icon: $r('sys.symbol.wallet'), title: '我的钱包', desc: '余额 · 红包 · 优惠券 · 发票', route: 'Wallet' },
     { icon: $r('sys.symbol.car'), title: '我的爱车', desc: '车辆管理 · 自动支付', route: 'MyVehicles' },
     { icon: $r('sys.symbol.doc_text'), title: '历史订单', desc: '全部 · 进行中 · 已完成', route: 'OrderHistory' },

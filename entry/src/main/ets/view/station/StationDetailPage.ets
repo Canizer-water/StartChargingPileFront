@@ -283,37 +283,34 @@ export struct StationDetailPage {
   }
 
   build() {
-    NavDestination() {
-      Column() {
-        if (this.station) {
-          this.Hero(this.station)
-          this.Counts(this.station)
-          this.InfoGrid(this.station)
+    Column() {
+      if (this.station) {
+        this.Hero(this.station)
+        this.Counts(this.station)
+        this.InfoGrid(this.station)
 
-          Text('推荐充电桩')
-            .fontSize(17)
-            .fontWeight(FontWeight.Bold)
-            .fontColor($r('app.color.text_primary'))
-            .width('100%')
-            .padding({ left: 16, top: 18, bottom: 8 })
-
-          Scroll() {
-            Column() {
-              ForEach(this.station.piles, (pile: ChargingPile) => {
-                this.PileCard(pile)
-              }, (pile: ChargingPile) => pile.id)
-            }
-            .padding({ left: 16, right: 16, bottom: 20 })
-          }
+        Text('推荐充电桩')
+          .fontSize(17)
+          .fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.text_primary'))
           .width('100%')
-          .layoutWeight(1)
-          .scrollBar(BarState.Off)
+          .padding({ left: 16, top: 18, bottom: 8 })
+
+        Scroll() {
+          Column() {
+            ForEach(this.station.piles, (pile: ChargingPile) => {
+              this.PileCard(pile)
+            }, (pile: ChargingPile) => pile.id)
+          }
+          .padding({ left: 16, right: 16, bottom: 20 })
         }
+        .width('100%')
+        .layoutWeight(1)
+        .scrollBar(BarState.Off)
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor($r('app.color.app_bg'))
     }
-    .hideTitleBar(true)
+    .width('100%')
+    .height('100%')
+    .backgroundColor($r('app.color.app_bg'))
   }
 }
