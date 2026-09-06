@@ -11,6 +11,7 @@ import { StationService } from './StationService';
  *   finishOrder(id, data)           ~ POST /charging/{id}/stop
  * 启动/结束会同步翻转 MockData 中桩的 status（IDLE<->CHARGING），
  * 保证扫码/列表看到的可充状态与订单一致。
+ * preferences API 可能抛异常，统一经 safe* 包裹转为 Promise 拒绝，由调用方 .catch 消费。
  */
 
 const STORE_NAME = 'order_store';
@@ -71,14 +72,18 @@ export class OrderService {
     return OrderService.instance;
   }
 
-  /** Ability 启动时初始化（页面兜底自初始化） */
+  /** Ability 启动时初始化（页面兜底自初始化，首次写入种子订单） */
   async init(ctx: common.Context): Promise<void> {
     if (this.store === null) {
-      this.store = await preferences.getPreferences(ctx, STORE_NAME);
-      const raw = await this.store.get(KEY_ORDERS, '') as string;
-      if (raw === '') {
-        await this.store.put(KEY_ORDERS, JSON.stringify(seedOrders()));
-        await this.store.flush();
+      try {
+        this.store = await preferences.getPreferences(ctx, STORE_NAME);
+        const raw = await this.store.get(KEY_ORDERS, '') as string;
+        if (raw === '') {
+          await this.store.put(KEY_ORDERS, JSON.stringify(seedOrders()));
+          await this.store.flush();
+        }
+      } catch (err) {
+        throw new Error('初始化订单存储失败');
       }
     }
   }
@@ -90,8 +95,27 @@ export class OrderService {
     return this.store;
   }
 
-  private async loadOrders(store: preferences.Preferences): Promise<ChargingOrder[]> {
-    const raw = await store.get(KEY_ORDERS, '') as string;
+  private async safeGet(key: string, def: string): Promise<string> {
+    const store = await this.requireStore();
+    try {
+      return await store.get(key, def) as string;
+    } catch (err) {
+      throw new Error(`读取订单存储失败(${key})`);
+    }
+  }
+
+  private async safePut(key: string, value: string): Promise<void> {
+    const store = await this.requireStore();
+    try {
+      await store.put(key, value);
+      await store.flush();
+    } catch (err) {
+      throw new Error(`写入订单存储失败(${key})`);
+    }
+  }
+
+  private async loadOrders(): Promise<ChargingOrder[]> {
+    const raw = await this.safeGet(KEY_ORDERS, '');
     if (raw === '') {
       return [];
     }
@@ -104,21 +128,18 @@ export class OrderService {
 
   /** 订单列表（新单在前）~ GET /orders */
   async listOrders(): Promise<ChargingOrder[]> {
-    const store = await this.requireStore();
-    const orders = await this.loadOrders(store);
+    const orders = await this.loadOrders();
     return orders.sort((a, b) => a.startTime < b.startTime ? 1 : -1);
   }
 
   /** 按订单号查询 ~ GET /orders/{id} */
   async getOrderById(id: string): Promise<ChargingOrder | undefined> {
-    const store = await this.requireStore();
-    const orders = await this.loadOrders(store);
+    const orders = await this.loadOrders();
     return orders.find((o) => o.id === id);
   }
 
   /** 启动充电：生成 CHARGING 订单并占用桩 ~ POST /charging/start */
   async startOrder(req: StartOrderRequest): Promise<OrderResult> {
-    const store = await this.requireStore();
     const svc = StationService.getInstance();
     const pile: ChargingPile | undefined = svc.getPileById(req.pileId);
     if (!pile) {
@@ -127,7 +148,7 @@ export class OrderService {
     if (pile.status !== 'IDLE') {
       return { success: false, message: '该充电桩当前不可用' };
     }
-    const orders = await this.loadOrders(store);
+    const orders = await this.loadOrders();
     if (orders.some((o) => o.status === 'CHARGING')) {
       return { success: false, message: '已有进行中的充电订单，请先结束' };
     }
@@ -147,8 +168,7 @@ export class OrderService {
       status: 'CHARGING'
     };
     orders.push(order);
-    await store.put(KEY_ORDERS, JSON.stringify(orders));
-    await store.flush();
+    await this.safePut(KEY_ORDERS, JSON.stringify(orders));
     pile.status = 'CHARGING';
     this.bumpOrdersVersion();
     return { success: true, message: '充电已启动', order: order };
@@ -156,8 +176,7 @@ export class OrderService {
 
   /** 结束充电：按实时数据结算订单并释放桩 ~ POST /charging/{id}/stop */
   async finishOrder(orderId: string, data: RealTimeChargingData): Promise<OrderResult> {
-    const store = await this.requireStore();
-    const orders = await this.loadOrders(store);
+    const orders = await this.loadOrders();
     const order = orders.find((o) => o.id === orderId);
     if (!order) {
       return { success: false, message: '订单不存在' };
@@ -172,8 +191,7 @@ export class OrderService {
     order.energyKwh = energy;
     order.amount = round2(energy * order.unitPrice);
     order.status = 'FINISHED';
-    await store.put(KEY_ORDERS, JSON.stringify(orders));
-    await store.flush();
+    await this.safePut(KEY_ORDERS, JSON.stringify(orders));
     const pile = StationService.getInstance().getPileByCode(order.pileCode);
     if (pile) {
       pile.status = 'IDLE';

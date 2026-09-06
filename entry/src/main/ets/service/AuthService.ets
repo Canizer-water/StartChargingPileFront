@@ -9,6 +9,7 @@ import { UserAccount } from '../model/Types';
  *   logout()       ~ POST /auth/logout
  *   restoreSession() ~ GET /auth/session
  * 联调后端时仅需将本类的存储实现替换为 HTTP 调用，调用方零改动。
+ * preferences API 可能抛异常，统一经 safe* 包裹转为 Promise 拒绝，由调用方 .catch 消费。
  * 注意：密码明文存储仅限前端演示（见《开发设计文档》§11），后端接入后废弃。
  */
 
@@ -54,7 +55,11 @@ export class AuthService {
   /** Ability 启动时初始化（Login/Register 页兜底自初始化） */
   async init(ctx: common.Context): Promise<void> {
     if (this.store === null) {
-      this.store = await preferences.getPreferences(ctx, STORE_NAME);
+      try {
+        this.store = await preferences.getPreferences(ctx, STORE_NAME);
+      } catch (err) {
+        throw new Error('初始化本地存储失败');
+      }
     }
   }
 
@@ -65,8 +70,37 @@ export class AuthService {
     return this.store;
   }
 
-  private async loadUsers(store: preferences.Preferences): Promise<UserAccount[]> {
-    const raw = await store.get(KEY_USERS, '') as string;
+  private async safeGet(key: string, def: string): Promise<string> {
+    const store = await this.requireStore();
+    try {
+      return await store.get(key, def) as string;
+    } catch (err) {
+      throw new Error(`读取本地存储失败(${key})`);
+    }
+  }
+
+  private async safePut(key: string, value: string): Promise<void> {
+    const store = await this.requireStore();
+    try {
+      await store.put(key, value);
+      await store.flush();
+    } catch (err) {
+      throw new Error(`写入本地存储失败(${key})`);
+    }
+  }
+
+  private async safeDelete(key: string): Promise<void> {
+    const store = await this.requireStore();
+    try {
+      await store.delete(key);
+      await store.flush();
+    } catch (err) {
+      throw new Error(`删除本地存储失败(${key})`);
+    }
+  }
+
+  private async loadUsers(): Promise<UserAccount[]> {
+    const raw = await this.safeGet(KEY_USERS, '');
     if (raw === '') {
       return [];
     }
@@ -79,8 +113,7 @@ export class AuthService {
 
   /** 注册（含账号唯一性校验）~ POST /auth/register */
   async register(req: RegisterRequest): Promise<AuthResult> {
-    const store = await this.requireStore();
-    const users = await this.loadUsers(store);
+    const users = await this.loadUsers();
     if (users.some((u) => u.username === req.username)) {
       return { success: false, message: '该手机号已注册' };
     }
@@ -92,15 +125,13 @@ export class AuthService {
       createdAt: new Date().toISOString()
     };
     users.push(user);
-    await store.put(KEY_USERS, JSON.stringify(users));
-    await store.flush();
+    await this.safePut(KEY_USERS, JSON.stringify(users));
     return { success: true, message: '注册成功', user: user };
   }
 
   /** 登录（账号存在 + 密码匹配 + 记住密码）~ POST /auth/login */
   async login(req: LoginRequest): Promise<AuthResult> {
-    const store = await this.requireStore();
-    const users = await this.loadUsers(store);
+    const users = await this.loadUsers();
     const user = users.find((u) => u.username === req.username);
     if (!user) {
       return { success: false, message: '账号不存在，请先注册' };
@@ -108,39 +139,34 @@ export class AuthService {
     if (user.password !== req.password) {
       return { success: false, message: '密码不一致，请重新输入' };
     }
-    await store.put(KEY_SESSION, user.id);
+    await this.safePut(KEY_SESSION, user.id);
     if (req.remember) {
       const remembered: RememberedAccount = { username: user.username, password: user.password };
-      await store.put(KEY_REMEMBER, JSON.stringify(remembered));
+      await this.safePut(KEY_REMEMBER, JSON.stringify(remembered));
     } else {
-      await store.delete(KEY_REMEMBER);
+      await this.safeDelete(KEY_REMEMBER);
     }
-    await store.flush();
     return { success: true, message: '登录成功', user: user };
   }
 
   /** 退出登录：清除会话（保留账号与记住密码）~ POST /auth/logout */
   async logout(): Promise<void> {
-    const store = await this.requireStore();
-    await store.delete(KEY_SESSION);
-    await store.flush();
+    await this.safeDelete(KEY_SESSION);
   }
 
   /** 冷启动恢复会话，无有效会话返回 null ~ GET /auth/session */
   async restoreSession(): Promise<UserAccount | null> {
-    const store = await this.requireStore();
-    const sessionId = await store.get(KEY_SESSION, '') as string;
+    const sessionId = await this.safeGet(KEY_SESSION, '');
     if (sessionId === '') {
       return null;
     }
-    const users = await this.loadUsers(store);
+    const users = await this.loadUsers();
     return users.find((u) => u.id === sessionId) ?? null;
   }
 
   /** 读取记住的账号密码（登录页回填用） */
   async getRemembered(): Promise<RememberedAccount | null> {
-    const store = await this.requireStore();
-    const raw = await store.get(KEY_REMEMBER, '') as string;
+    const raw = await this.safeGet(KEY_REMEMBER, '');
     if (raw === '') {
       return null;
     }

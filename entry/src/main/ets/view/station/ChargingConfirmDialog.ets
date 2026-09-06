@@ -55,7 +55,9 @@ export struct ChargingConfirmDialog {
           PrimaryButton({
             label: '取 消',
             isOutline: true,
-            onTap: () => this.controller.close()
+            onTap: () => {
+              this.controller.close();
+            }
           })
         }
         .layoutWeight(1)
