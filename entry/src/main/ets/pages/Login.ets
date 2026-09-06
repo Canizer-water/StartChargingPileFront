@@ -11,8 +11,10 @@ struct LoginPage {
   @State rememberPassword: boolean = false;
   @State logging: boolean = false;
 
-  aboutToAppear(): void {
-    // 回填：优先「记住密码」的账号，其次注册成功后的手机号（Story 1/2）
+  // @Entry 页从注册页 router.back() 返回时不重新走 aboutToAppear，
+  // 回填逻辑放 onPageShow 保证每次可见都执行（Story 1/2）
+  onPageShow(): void {
+    // 回填：优先「记住密码」的账号，其次注册成功后的手机号
     const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
     AuthService.getInstance().init(ctx).then(async () => {
       const remembered: RememberedAccount | null = await AuthService.getInstance().getRemembered();
