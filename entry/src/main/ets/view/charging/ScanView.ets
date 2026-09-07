@@ -33,17 +33,21 @@ export struct ScanView {
     }
   }
 
-  /** 模拟识别：解析一个真实空闲桩 */
-  private recognize(): boolean {
-    const pile = StationService.getInstance().pickIdlePile();
-    if (!pile) {
-      this.showToast('暂无空闲充电桩，请稍后再试');
-      return false;
-    }
-    this.foundPile = pile;
-    this.scanDone = true;
-    this.showToast(`识别成功：${pile.code} ${pile.interfaceType}`);
-    return true;
+  /** 模拟识别：先从后端刷新桩状态，再解析一个真实空闲桩（契约 §5.2） */
+  private recognize(): void {
+    const svc = StationService.getInstance();
+    svc.refresh().then(() => {
+      const pile = svc.pickIdlePile();
+      if (!pile) {
+        this.showToast('暂无空闲充电桩，请稍后再试');
+        return;
+      }
+      this.foundPile = pile;
+      this.scanDone = true;
+      this.showToast(`识别成功：${pile.code} ${pile.interfaceType}`);
+    }).catch(() => {
+      this.showToast('无法连接后端服务，请确认服务已启动');
+    });
   }
 
   private startScan(): void {

@@ -1,4 +1,3 @@
-import { common } from '@kit.AbilityKit';
 import { ChargingOrder, NavParam } from '../model/Types';
 import { OrderService } from '../service/OrderService';
 import { AppTopBar } from '../component/AppTopBar';
@@ -21,15 +20,14 @@ export struct OrderView {
   private tabs: string[] = ['全部', '充电中', '已完成'];
 
   aboutToAppear(): void {
-    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    OrderService.getInstance().init(ctx).then(() => this.reload());
+    this.reload();
   }
 
   private reload(): void {
     OrderService.getInstance().listOrders().then((list: ChargingOrder[]) => {
       this.orders = list;
     }).catch(() => {
-      // 存储异常时保持旧数据
+      // 网络/服务异常时保持旧数据
     });
   }
 

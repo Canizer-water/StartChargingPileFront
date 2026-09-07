@@ -2,7 +2,6 @@ import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want 
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { AuthService } from '../service/AuthService';
-import { OrderService } from '../service/OrderService';
 import { UserAccount } from '../model/Types';
 
 const DOMAIN = 0x0000;
@@ -33,11 +32,8 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    // 会话门禁：先恢复本地登录态，再决定进主框架还是登录页
-    Promise.all([
-      AuthService.getInstance().init(this.context),
-      OrderService.getInstance().init(this.context)
-    ])
+    // 会话门禁：先恢复本地登录态（联调后：token 换 GET /auth/me），再决定进主框架还是登录页
+    AuthService.getInstance().init(this.context)
       .then(async () => {
         const user: UserAccount | null = await AuthService.getInstance().restoreSession();
         if (user) {

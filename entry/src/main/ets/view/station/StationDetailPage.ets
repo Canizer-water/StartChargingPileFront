@@ -15,6 +15,12 @@ export struct StationDetailPage {
   @State station: ChargingStation | undefined = undefined;
 
   aboutToAppear(): void {
+    this.load();
+    StationService.getInstance().refresh().then(() => this.load()).catch(() => {
+    });
+  }
+
+  private load(): void {
     this.station = StationService.getInstance().getStationById(this.stationId);
   }
 

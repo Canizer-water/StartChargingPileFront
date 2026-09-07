@@ -1,4 +1,3 @@
-import { common } from '@kit.AbilityKit';
 import { ChargingOrder } from '../../model/Types';
 import { OrderService } from '../../service/OrderService';
 import { AppTopBar } from '../../component/AppTopBar';
@@ -19,9 +18,7 @@ export struct BillPage {
   @State order: ChargingOrder | null = null;
 
   aboutToAppear(): void {
-    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    OrderService.getInstance().init(ctx).then(async () => {
-      const order = await OrderService.getInstance().getOrderById(this.orderId);
+    OrderService.getInstance().getOrderById(this.orderId).then((order) => {
       if (!order) {
         this.toast('未找到订单');
         this.pathStack.pop();
@@ -29,7 +26,7 @@ export struct BillPage {
       }
       this.order = order;
     }).catch(() => {
-      // 加载失败保持空态
+      this.toast('订单加载失败');
     });
   }
 

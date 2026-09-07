@@ -1,21 +1,17 @@
 import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { UserAccount } from '../model/Types';
+import { ApiError, Http, HttpResult } from './Http';
 
 /**
- * 账号服务（Story 1/2）：本地 preferences 持久化，接口形状与未来后端对齐——
- *   register(req)  ~ POST /auth/register
- *   login(req)     ~ POST /auth/login
- *   logout()       ~ POST /auth/logout
- *   restoreSession() ~ GET /auth/session
- * 联调后端时仅需将本类的存储实现替换为 HTTP 调用，调用方零改动。
- * preferences API 可能抛异常，统一经 safe* 包裹转为 Promise 拒绝，由调用方 .catch 消费。
- * 注意：密码明文存储仅限前端演示（见《开发设计文档》§11），后端接入后废弃。
+ * 账号服务（Story 1/2）——联调后：认证走后端 /auth/*（设计文档 §5.1），
+ * 本地 preferences 仅存两样：会话 JWT（session_token）与「记住密码」（纯端侧体验）。
+ * 方法签名与本地模拟时代完全一致，页面零改动。
+ * 后端 JWT 无状态，logout 仅清除端侧 token（服务端不保留会话表）。
  */
 
 const STORE_NAME = 'auth_store';
-const KEY_USERS = 'users';       // UserAccount[] JSON
-const KEY_SESSION = 'session';   // 已登录用户 id
+const KEY_TOKEN = 'session_token';
 const KEY_REMEMBER = 'remember'; // { username, password } JSON
 
 /** POST /auth/register 请求体 */
@@ -44,6 +40,16 @@ export interface RememberedAccount {
   password: string;
 }
 
+/** 后端 TokenResult 响应 */
+interface TokenPayload {
+  token: string;
+  user: UserAccount;
+}
+
+function errorMessage(err: Object, fallback: string): string {
+  return err instanceof ApiError && err.message !== '' ? err.message : fallback;
+}
+
 export class AuthService {
   private static instance: AuthService = new AuthService();
   private store: preferences.Preferences | null = null;
@@ -63,108 +69,104 @@ export class AuthService {
     }
   }
 
-  private async requireStore(): Promise<preferences.Preferences> {
-    if (this.store === null) {
-      throw new Error('AuthService not initialized');
-    }
-    return this.store;
-  }
-
   private async safeGet(key: string, def: string): Promise<string> {
-    const store = await this.requireStore();
+    if (this.store === null) {
+      return def;
+    }
     try {
-      return await store.get(key, def) as string;
+      return await this.store.get(key, def) as string;
     } catch (err) {
-      throw new Error(`读取本地存储失败(${key})`);
+      return def;
     }
   }
 
   private async safePut(key: string, value: string): Promise<void> {
-    const store = await this.requireStore();
+    if (this.store === null) {
+      return;
+    }
     try {
-      await store.put(key, value);
-      await store.flush();
+      await this.store.put(key, value);
+      await this.store.flush();
     } catch (err) {
-      throw new Error(`写入本地存储失败(${key})`);
+      // 本地回显数据写失败不阻断主流程
     }
   }
 
   private async safeDelete(key: string): Promise<void> {
-    const store = await this.requireStore();
+    if (this.store === null) {
+      return;
+    }
     try {
-      await store.delete(key);
-      await store.flush();
+      await this.store.delete(key);
+      await this.store.flush();
     } catch (err) {
-      throw new Error(`删除本地存储失败(${key})`);
+      // 同上
     }
   }
 
-  private async loadUsers(): Promise<UserAccount[]> {
-    const raw = await this.safeGet(KEY_USERS, '');
-    if (raw === '') {
-      return [];
-    }
-    try {
-      return JSON.parse(raw) as UserAccount[];
-    } catch (err) {
-      return [];
-    }
-  }
-
-  /** 注册（含账号唯一性校验）~ POST /auth/register */
+  /** 注册 ~ POST /auth/register（唯一性校验由后端裁决，409） */
   async register(req: RegisterRequest): Promise<AuthResult> {
-    const users = await this.loadUsers();
-    if (users.some((u) => u.username === req.username)) {
-      return { success: false, message: '该手机号已注册' };
+    const body: RegisterRequest = { username: req.username, password: req.password };
+    try {
+      const res: HttpResult = await Http.post('/auth/register', JSON.stringify(body));
+      const payload = Http.parse<TokenPayload>(res);
+      await this.safePut(KEY_TOKEN, payload.token);
+      return { success: true, message: '注册成功', user: payload.user };
+    } catch (err) {
+      return { success: false, message: errorMessage(err, '注册失败，请稍后重试') };
     }
-    const user: UserAccount = {
-      id: `U${Date.now()}`,
-      username: req.username,
-      password: req.password,
-      avatar: '',
-      createdAt: new Date().toISOString()
-    };
-    users.push(user);
-    await this.safePut(KEY_USERS, JSON.stringify(users));
-    return { success: true, message: '注册成功', user: user };
   }
 
-  /** 登录（账号存在 + 密码匹配 + 记住密码）~ POST /auth/login */
+  /** 登录 ~ POST /auth/login（401=账号或密码错误；remember 纯端侧） */
   async login(req: LoginRequest): Promise<AuthResult> {
-    const users = await this.loadUsers();
-    const user = users.find((u) => u.username === req.username);
-    if (!user) {
-      return { success: false, message: '账号不存在，请先注册' };
+    const body: LoginRequest = { username: req.username, password: req.password, remember: false };
+    try {
+      const res: HttpResult = await Http.post('/auth/login', JSON.stringify(body));
+      const payload = Http.parse<TokenPayload>(res);
+      await this.safePut(KEY_TOKEN, payload.token);
+      if (req.remember) {
+        const remembered: RememberedAccount = { username: req.username, password: req.password };
+        await this.safePut(KEY_REMEMBER, JSON.stringify(remembered));
+      } else {
+        await this.safeDelete(KEY_REMEMBER);
+      }
+      return { success: true, message: '登录成功', user: payload.user };
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        return { success: false, message: '账号或密码错误' };
+      }
+      return { success: false, message: errorMessage(err, '登录失败，请稍后重试') };
     }
-    if (user.password !== req.password) {
-      return { success: false, message: '密码不一致，请重新输入' };
-    }
-    await this.safePut(KEY_SESSION, user.id);
-    if (req.remember) {
-      const remembered: RememberedAccount = { username: user.username, password: user.password };
-      await this.safePut(KEY_REMEMBER, JSON.stringify(remembered));
-    } else {
-      await this.safeDelete(KEY_REMEMBER);
-    }
-    return { success: true, message: '登录成功', user: user };
   }
 
-  /** 退出登录：清除会话（保留账号与记住密码）~ POST /auth/logout */
+  /** 退出登录：清除端侧会话 token（保留记住密码） */
   async logout(): Promise<void> {
-    await this.safeDelete(KEY_SESSION);
+    await this.safeDelete(KEY_TOKEN);
   }
 
-  /** 冷启动恢复会话，无有效会话返回 null ~ GET /auth/session */
+  /** 冷启动恢复会话 ~ GET /auth/me；token 失效自动清理 */
   async restoreSession(): Promise<UserAccount | null> {
-    const sessionId = await this.safeGet(KEY_SESSION, '');
-    if (sessionId === '') {
+    const token = await this.safeGet(KEY_TOKEN, '');
+    if (token === '') {
       return null;
     }
-    const users = await this.loadUsers();
-    return users.find((u) => u.id === sessionId) ?? null;
+    try {
+      const res: HttpResult = await Http.get('/auth/me', token);
+      return Http.parse<UserAccount>(res);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        await this.safeDelete(KEY_TOKEN);
+      }
+      return null;
+    }
   }
 
-  /** 读取记住的账号密码（登录页回填用） */
+  /** 当前会话 token（供业务服务带鉴权头；空串=未登录） */
+  async getToken(): Promise<string> {
+    return this.safeGet(KEY_TOKEN, '');
+  }
+
+  /** 读取记住的账号密码（登录页回填用，本地行为） */
   async getRemembered(): Promise<RememberedAccount | null> {
     const raw = await this.safeGet(KEY_REMEMBER, '');
     if (raw === '') {

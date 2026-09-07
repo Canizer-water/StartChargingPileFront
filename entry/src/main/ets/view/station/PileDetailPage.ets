@@ -1,4 +1,3 @@
-import { common } from '@kit.AbilityKit';
 import { ChargingOrder, ChargingPile, NavParam } from '../../model/Types';
 import { StationService } from '../../service/StationService';
 import { pileMeta } from '../../model/MockData';
@@ -23,6 +22,12 @@ export struct PileDetailPage {
   private dialogController: CustomDialogController | null = null;
 
   aboutToAppear(): void {
+    this.load();
+    StationService.getInstance().refresh().then(() => this.load()).catch(() => {
+    });
+  }
+
+  private load(): void {
     this.pile = StationService.getInstance().getPileById(this.pileId);
   }
 
@@ -53,10 +58,8 @@ export struct PileDetailPage {
       return;
     }
     this.starting = true;
-    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
     const req: StartOrderRequest = { pileId: pileId };
-    OrderService.getInstance().init(ctx)
-      .then(() => OrderService.getInstance().startOrder(req))
+    OrderService.getInstance().startOrder(req)
       .then((res: OrderResult) => {
         const order: ChargingOrder | undefined = res.order;
         if (!res.success || !order) {

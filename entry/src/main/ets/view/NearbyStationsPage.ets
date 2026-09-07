@@ -20,6 +20,13 @@ export struct NearbyStationsPage {
   @State recommended: ChargingStation[] = [];
 
   aboutToAppear(): void {
+    // 先显缓存，再向后端拉最新桩状态（联调：GET /stations）
+    this.loadFromCache();
+    StationService.getInstance().refresh().then(() => this.loadFromCache()).catch(() => {
+    });
+  }
+
+  private loadFromCache(): void {
     const svc = StationService.getInstance();
     this.stations = svc.getStations();
     this.nearest = svc.getNearest();

@@ -1,6 +1,4 @@
-import { common } from '@kit.AbilityKit';
 import { ChargingOrder, ChargingPile, NavParam, RealTimeChargingData } from '../../model/Types';
-import { ChargeSimulator } from '../../service/ChargeSimulator';
 import { OrderResult, OrderService } from '../../service/OrderService';
 import { StationService } from '../../service/StationService';
 import { pileMeta } from '../../model/MockData';
@@ -9,8 +7,8 @@ import { InfoRow } from '../../component/InfoRow';
 import { PrimaryButton } from '../../component/PrimaryButton';
 
 /**
- * 充电中（Story 11/12）：按会话订单启动 ChargeSimulator 实时刷新，
- * 结束充电经 OrderService 结算并跳转汇总页。
+ * 充电中（Story 11/12）：1s 轮询 GET /charging/current（服务端模拟，契约 §7 一期）；
+ * 结束充电走 POST /charging/{id}/stop，结算由服务端裁决。
  */
 
 const ZERO_DATA: RealTimeChargingData = {
@@ -30,39 +28,70 @@ export struct ChargingPage {
   @State pile: ChargingPile | null = null;
   @State data: RealTimeChargingData = ZERO_DATA;
   @State finishing: boolean = false;
-  private simulator: ChargeSimulator = new ChargeSimulator();
+  private pollTimer: number = -1;
 
   aboutToAppear(): void {
-    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    OrderService.getInstance().init(ctx).then(async () => {
-      const order = await OrderService.getInstance().getOrderById(this.orderId);
+    this.loadSession();
+    this.startPolling();
+  }
+
+  aboutToDisappear(): void {
+    this.stopPolling();
+  }
+
+  private loadSession(): void {
+    OrderService.getInstance().getOrderById(this.orderId).then(async (order) => {
       if (!order) {
         this.toast('未找到充电会话');
+        this.stopPolling();
         this.pathStack.pop();
         return;
       }
       if (order.status === 'FINISHED') {
         // 会话已结算：直接替换为汇总页，避免重复结束
+        this.stopPolling();
         const param: NavParam = { id: order.id };
         this.pathStack.replacePathByName('ChargeComplete', param);
         return;
       }
       this.order = order;
-      const pile = StationService.getInstance().getPileByCode(order.pileCode);
-      this.pile = pile ?? null;
-      if (pile) {
-        this.simulator.start(pile, 1000, (d: RealTimeChargingData) => {
-          this.data = d;
-        });
+      // 桩档案（停车位/接口展示用）：刷新站点缓存后取数
+      try {
+        await StationService.getInstance().refresh();
+      } catch (err) {
+        // 拉取失败则用旧缓存兜底
       }
+      this.pile = StationService.getInstance().getPileByCode(order.pileCode) ?? null;
     }).catch(() => {
       this.toast('充电会话加载失败');
+      this.stopPolling();
       this.pathStack.pop();
     });
   }
 
-  aboutToDisappear(): void {
-    this.simulator.stop();
+  private startPolling(): void {
+    this.pollOnce();
+    this.pollTimer = setInterval(() => this.pollOnce(), 1000);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer !== -1) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = -1;
+    }
+  }
+
+  private pollOnce(): void {
+    OrderService.getInstance().currentRealtime().then((d) => {
+      if (!d) {
+        // 无进行中会话（可能已在别处结算）：停表并回退
+        this.stopPolling();
+        return;
+      }
+      this.data = d;
+    }).catch(() => {
+      // 网络抖动保留上一 tick 数据，下个间隔继续轮询
+    });
   }
 
   private toast(message: string): void {
@@ -99,7 +128,7 @@ export struct ChargingPage {
       return;
     }
     this.finishing = true;
-    this.simulator.stop();
+    this.stopPolling();
     const orderId = this.order.id;
     OrderService.getInstance().finishOrder(orderId, this.data)
       .then((res: OrderResult) => {

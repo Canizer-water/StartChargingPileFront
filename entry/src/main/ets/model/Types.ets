@@ -9,13 +9,12 @@ export interface NavParam {
   id: string;
 }
 
-/** 用户账号（演示：密码仅本地存储，实际项目由后端加密） */
+/** 用户账号 —— 对齐后端 GET /auth/me 的 UserOut；密码不再经端侧存储（联调后收紧，契约 §5.1） */
 export interface UserAccount {
   id: string;
   username: string;      // 手机号
-  password: string;
   avatar: string;        // 头像资源名
-  createdAt: string;     // 注册时间 ISO 字符串
+  createdAt: string;     // 注册时间 'YYYY-MM-DD HH:MM:SS'
 }
 
 /** 充电桩状态 */

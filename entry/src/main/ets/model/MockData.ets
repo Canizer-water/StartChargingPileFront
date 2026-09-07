@@ -1,54 +1,9 @@
-import { ChargingPile, ChargingStation } from './Types';
-
 /**
- * 本地模拟数据（前端演示用，无后端依赖）。
- * 领域数据（站点/桩）严格使用 Types.ets 的规范模型；
- * 纯展示信息（停车位号/楼层/收费方式/地图坐标等）单独放 DisplayMeta 表，
- * 页面经 stationMeta()/pileMeta() 查询，不与后端接口字段混淆。
+ * 展示元数据表（联调后：域数据——站点/桩/订单——一律来自后端，本文件不再承载）。
+ * 这里只保留纯 UI 字段（停车位号/楼层/收费方式/电话/标签/自绘地图坐标），
+ * 契约 §10 决策 1：展示元数据后端不建模，页面经 stationMeta()/pileMeta() 查询。
+ * 桩档案与业务规则以服务端为准；本表按后端种子数据（seed.py）的 id/code 对齐。
  */
-
-const PILES_S1: ChargingPile[] = [
-  { id: 'p000000002', stationId: 's1', code: 'p000000002', powerKw: 150, pricePerKwh: 1.35, interfaceType: '国标2015 国标2011', status: 'IDLE' },
-  { id: 'p000000003', stationId: 's1', code: 'p000000003', powerKw: 120, pricePerKwh: 1.25, interfaceType: '国标2015', status: 'CHARGING' },
-  { id: 'p000000004', stationId: 's1', code: 'p000000004', powerKw: 60, pricePerKwh: 1.15, interfaceType: '国标2011', status: 'IDLE' }
-];
-
-const PILES_S2: ChargingPile[] = [
-  { id: 'p100000001', stationId: 's2', code: 'p100000001', powerKw: 180, pricePerKwh: 1.45, interfaceType: '国标2015 国标2011', status: 'IDLE' },
-  { id: 'p100000002', stationId: 's2', code: 'p100000002', powerKw: 90, pricePerKwh: 1.20, interfaceType: '国标2015', status: 'IDLE' }
-];
-
-const PILES_S3: ChargingPile[] = [
-  { id: 'p300000001', stationId: 's3', code: 'p300000001', powerKw: 120, pricePerKwh: 1.10, interfaceType: '国标2015 国标2011', status: 'OFFLINE' },
-  { id: 'p300000002', stationId: 's3', code: 'p300000002', powerKw: 60, pricePerKwh: 1.05, interfaceType: '国标2011', status: 'IDLE' }
-];
-
-const PILES_S4: ChargingPile[] = [
-  { id: 'p400000001', stationId: 's4', code: 'p400000001', powerKw: 7, pricePerKwh: 1.02, interfaceType: '国标交流', status: 'IDLE' }
-];
-
-export const MOCK_STATIONS: ChargingStation[] = [
-  {
-    id: 's1', name: '诺得充电中心', address: '「地上」五圆路东街159号诺得大厦',
-    distanceKm: 0.03, pricePerKwh: 1.15, businessHours: '00:00-22:22',
-    freePiles: 2, piles: PILES_S1
-  },
-  {
-    id: 's2', name: '智慧e充·天辰店', address: '「地上」天辰大厦西路88号',
-    distanceKm: 0.8, pricePerKwh: 1.20, businessHours: '00:00-24:00',
-    freePiles: 2, piles: PILES_S2
-  },
-  {
-    id: 's3', name: '星充能源大厦站', address: '「地下」会展大道199号能源大厦B2',
-    distanceKm: 1.6, pricePerKwh: 1.05, businessHours: '08:00-22:00',
-    freePiles: 1, piles: PILES_S3
-  },
-  {
-    id: 's4', name: '绿色出行会展中心站', address: '「地上」会展大道100号',
-    distanceKm: 2.4, pricePerKwh: 1.02, businessHours: '00:00-24:00',
-    freePiles: 1, piles: PILES_S4
-  }
-];
 
 /** 充电站展示元数据（不属于领域模型，仅本页式渲染用） */
 export interface StationDisplayMeta {
