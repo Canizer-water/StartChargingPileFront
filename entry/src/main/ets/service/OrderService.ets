@@ -3,8 +3,8 @@ import { ApiError, Http, HttpResult } from './Http';
 import { AuthService } from './AuthService';
 
 /**
- * 订单服务（联调版，契约 §5.3/§5.4）：全部端点走后端。
- *   listOrders()          ~ GET  /orders
+ * 订单服务（联调版，契约 §5.3/§5.4，orders 列表已按 v0.3 Envelope 分页）：全部端点走后端。
+ *   listOrders()          ~ GET  /orders?page=1&size=50 → 解 Envelope<OrderPage>.data.items
  *   getOrderById(id)      ~ GET  /orders/{id}
  *   startOrder(req)       ~ POST /charging/start
  *   finishOrder(id)       ~ POST /charging/{id}/stop
@@ -25,6 +25,22 @@ export interface OrderResult {
   order?: ChargingOrder;
 }
 
+/** 后端 v0.3 Envelope 分页负载（契约 §5.6/§5.4，字段 camelCase） */
+interface OrderPagePayload {
+  items: ChargingOrder[];
+  page: number;
+  size: number;
+  total: number;
+}
+
+/** 后端 v0.3 统一响应 Envelope<T>（success/errorCode/message/data） */
+interface OrderEnvelope {
+  success: boolean;
+  errorCode: number;
+  message: string;
+  data: OrderPagePayload;
+}
+
 export class OrderService {
   private static instance: OrderService = new OrderService();
 
@@ -36,10 +52,11 @@ export class OrderService {
     return AuthService.getInstance().getToken();
   }
 
-  /** 订单列表（新单在前）~ GET /orders */
+  /** 订单列表（新单在前）~ GET /orders?page=1&size=50；取近 50 条供当前单页列表 + 本地状态筛选 */
   async listOrders(): Promise<ChargingOrder[]> {
-    const res: HttpResult = await Http.get('/orders', await this.token());
-    return Http.parse<ChargingOrder[]>(res);
+    const res: HttpResult = await Http.get('/orders?page=1&size=50', await this.token());
+    const env = Http.parse<OrderEnvelope>(res);
+    return env.data?.items ?? [];
   }
 
   /** 按订单号查询 ~ GET /orders/{id}；404 返回 undefined */
