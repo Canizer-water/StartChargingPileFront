@@ -5,6 +5,8 @@
     "pages/ScanView",
     "pages/ChargingPage",
     "pages/ChargeCompletePage",
-    "pages/BillPage"
+    "pages/BillPage",
+    "pages/LicensePlatePage",
+    "pages/AiChatPage"
   ]
 }
