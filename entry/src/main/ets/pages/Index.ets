@@ -3,6 +3,7 @@ import { HomeView } from '../view/HomeView';
 import { NearbyStationsPage } from '../view/NearbyStationsPage';
 import { StationDetailPage } from '../view/station/StationDetailPage';
 import { PileDetailPage } from '../view/station/PileDetailPage';
+import { StationMapPage } from '../view/station/StationMapPage';
 import { OrderView } from '../view/OrderView';
 import { MineView } from '../view/mine/MineView';
 import { ScanView } from '../view/charging/ScanView';
@@ -44,6 +45,10 @@ struct Index {
     } else if (name === 'StationDetail') {
       NavDestination() {
         StationDetailPage({ pathStack: this.pathStack, stationId: this.idOf(param) })
+      }.hideTitleBar(true)
+    } else if (name === 'StationMap') {
+      NavDestination() {
+        StationMapPage({ pathStack: this.pathStack })
       }.hideTitleBar(true)
     } else if (name === 'PileDetail') {
       NavDestination() {

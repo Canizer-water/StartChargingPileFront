@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "reason_location",
+      "value": "用于在地图上展示附近充电站、计算距离与就近排序"
     }
   ]
 }

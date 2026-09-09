@@ -32,6 +32,8 @@ export interface ChargingPile {
   id: string;
   stationId: string;
   code: string;          // 桩编号，同时作为二维码内容
+  latitude: number;      // 纬度（后端 PileOut.latitude）
+  longitude: number;     // 经度
   powerKw: number;       // 额定功率 kW
   pricePerKwh: number;   // 单价 元/度
   interfaceType: string; // 接口类型，如 国标2015
@@ -43,6 +45,8 @@ export interface ChargingStation {
   id: string;
   name: string;
   address: string;
+  latitude: number;      // 纬度（后端 StationOut.latitude）
+  longitude: number;     // 经度
   distanceKm: number;     // 距离 km
   freePiles: number;      // 空闲桩数（= piles 中 IDLE 数）
   pricePerKwh: number;    // 对外展示单价 元/度

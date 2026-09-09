@@ -24,6 +24,14 @@ export class StationService {
     this.cache = Http.parse<ChargingStation[]>(res);
   }
 
+  /** 附近检索 ~ GET /stations?lat=&lng=&radius=（服务端 haversine；命中即更新缓存） */
+  async nearby(lat: number, lng: number, radiusKm: number = 50): Promise<ChargingStation[]> {
+    const token = await AuthService.getInstance().getToken();
+    const res: HttpResult = await Http.get(`/stations?lat=${lat}&lng=${lng}&radius=${radiusKm}`, token);
+    this.cache = Http.parse<ChargingStation[]>(res);
+    return this.cache;
+  }
+
   /** 附近充电中心列表（按距离升序；排序口径归前端，§5.2） */
   getStations(): ChargingStation[] {
     return this.cache.slice().sort((a, b) => a.distanceKm - b.distanceKm);

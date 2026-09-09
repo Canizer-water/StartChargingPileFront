@@ -38,6 +38,11 @@ export struct NearbyStationsPage {
     this.pathStack.pushPathByName('StationDetail', param);
   }
 
+  private goRealMap(): void {
+    const param: NavParam = { id: '' };
+    this.pathStack.pushPathByName('StationMap', param);
+  }
+
   /** 标签 chip */
   @Builder
   TagChip(text: string, bg: ResourceColor, fg: ResourceColor) {
@@ -261,13 +266,24 @@ export struct NearbyStationsPage {
 
       Scroll() {
         Column() {
-          // 地图
-          MapView({ stations: this.stations })
-            .width('100%')
-            .height(220)
-            .borderRadius(12)
-            .clip(true)
-            .margin({ top: 8 })
+          // 地图（示意）+ 真实地图入口
+          Stack({ alignContent: Alignment.TopEnd }) {
+            MapView({ stations: this.stations })
+              .width('100%')
+              .height(220)
+              .borderRadius(12)
+              .clip(true)
+            Text('真实地图 ›')
+              .fontSize(12)
+              .fontColor(Color.White)
+            .padding({ left: 10, right: 10, top: 5, bottom: 5 })
+            .backgroundColor(0x66000000)
+            .borderRadius(14)
+            .margin({ top: 8, right: 8 })
+            .onClick(() => this.goRealMap())
+          }
+          .width('100%')
+          .margin({ top: 8 })
 
           if (this.nearest) {
             this.SectionTitle('离我最近')
