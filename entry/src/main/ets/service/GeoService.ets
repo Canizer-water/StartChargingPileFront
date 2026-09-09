@@ -3,13 +3,9 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { geoLocationManager } from '@kit.LocationKit';
 
 /**
- * 定位服务：动态申请定位权限 → 取当前经纬度（地图就近检索用）。
+ * 定位服务：动态申请定位权限 → 取当前定位。
+ * 返回 LocationKit 原始 Location（Map Kit 的 setMyLocation 需要整包，不能只给经纬度）。
  */
-
-export interface LatLng {
-  lat: number;
-  lng: number;
-}
 
 export class GeoService {
   private static instance: GeoService = new GeoService();
@@ -25,36 +21,34 @@ export class GeoService {
         'ohos.permission.APPROXIMATELY_LOCATION',
         'ohos.permission.LOCATION'
       ]);
-      return res.authResults.every((r: number) => r === 0);
+      return res.authResults.some((r: number) => r === 0);
     } catch (err) {
-      console.error(`request location permission failed: ${JSON.stringify(err)}`);
+      const e = err as BusinessError;
+      console.error(`request location permission failed code=${e.code} msg=${e.message}`);
       return false;
     }
   }
 
-  /** 取当前定位；未授权或失败返回 null（调用方走全量列表兜底）。 */
-  async currentPosition(ctx: common.UIAbilityContext): Promise<LatLng | null> {
+  /** 取当前定位；未授权或定位失败返回 null（调用方走全量列表兜底）。 */
+  async currentLocation(ctx: common.UIAbilityContext): Promise<geoLocationManager.Location | null> {
     const granted = await this.ensurePermission(ctx);
     if (!granted) {
+      console.warn('location permission denied');
       return null;
     }
     const request: geoLocationManager.CurrentLocationRequest = {
       'priority': geoLocationManager.LocationRequestPriority.FIRST_FIX,
       'scenario': geoLocationManager.LocationRequestScenario.UNSET,
-      'maxAccuracy': 0
+      'maxAccuracy': 0,
+      'timeoutMs': 10000
     };
-    return new Promise<LatLng | null>((resolve) => {
-      try {
-        geoLocationManager.getCurrentLocation(request, (err: BusinessError, loc) => {
-          if (err || !loc) {
-            resolve(null);
-            return;
-          }
-          resolve({ lat: loc.latitude, lng: loc.longitude });
-        });
-      } catch (err) {
-        resolve(null);
-      }
-    });
+    try {
+      return await geoLocationManager.getCurrentLocation(request);
+    } catch (err) {
+      const e = err as BusinessError;
+      // 3301100 定位服务未开启 / 3301200 获取位置信息超时
+      console.error(`getCurrentLocation failed code=${e.code} msg=${e.message}`);
+      return null;
+    }
   }
 }
