@@ -31,7 +31,8 @@ struct AiChatPage {
       this.messages.push({ role: 'assistant', content: reply });
     } catch (err) {
       console.error(`chat failed: ${JSON.stringify(err)}`);
-      this.messages.push({ role: 'assistant', content: '抱歉，请求失败了，请稍后重试。' });
+      const msg = (err as Error)?.message || '抱歉，请求失败了，请稍后重试。';
+      this.messages.push({ role: 'assistant', content: msg });
     } finally {
       this.loading = false;
       this.scrollToBottom();

@@ -45,8 +45,9 @@ struct LicensePlatePage {
       const plate = await recognizeLicensePlate(this.pickedImage);
       this.result = plate;
     } catch (err) {
-      this.showToast('识别失败，请重试');
       console.error(`recognize failed: ${JSON.stringify(err)}`);
+      const msg = (err as Error)?.message || '识别失败，请重试';
+      this.showToast(msg);
     } finally {
       this.recognizing = false;
     }
