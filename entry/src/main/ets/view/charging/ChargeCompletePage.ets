@@ -6,7 +6,7 @@ import { PrimaryButton } from '../../component/PrimaryButton';
 
 /**
  * 充电结束汇总（Story 13）：数据取自结算后的真实订单，
- * 查看账单进入 Bill，返回首页回到导航根。
+ * 查看账单进入 Bill；返回首页走 Index 注入的 goHome（清页面栈 + 切首页 tab）。
  */
 
 @Component
@@ -16,6 +16,8 @@ export struct ChargeCompletePage {
   orderId: string = '';
 
   @State order: ChargingOrder | null = null;
+  /** 回首页（Index 注入：清页面栈 + 切首页 tab）；缺省时退化为回导航栈底 */
+  onHomeTab?: () => void;
 
   aboutToAppear(): void {
     OrderService.getInstance().getOrderById(this.orderId).then((order) => {
@@ -44,6 +46,10 @@ export struct ChargeCompletePage {
   }
 
   private backHome(): void {
+    if (this.onHomeTab) {
+      this.onHomeTab();
+      return;
+    }
     this.pathStack.popToIndex(0);
   }
 

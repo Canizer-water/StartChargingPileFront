@@ -16,6 +16,8 @@ export struct BillPage {
   orderId: string = '';
 
   @State order: ChargingOrder | null = null;
+  /** 回首页（Index 注入：清页面栈 + 切首页 tab）；缺省时退化为回导航栈底 */
+  onHomeTab?: () => void;
 
   aboutToAppear(): void {
     OrderService.getInstance().getOrderById(this.orderId).then((order) => {
@@ -43,6 +45,10 @@ export struct BillPage {
   }
 
   private backHome(): void {
+    if (this.onHomeTab) {
+      this.onHomeTab();
+      return;
+    }
     this.pathStack.popToIndex(0);
   }
 

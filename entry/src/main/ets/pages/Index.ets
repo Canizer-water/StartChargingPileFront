@@ -36,6 +36,19 @@ struct Index {
     this.tabsController.changeIndex(index);
   }
 
+  /**
+   * 回首页：NavPathStack 是压在 tab 框架（navBar）之上的，栈底只是会话里第一个
+   * push 的页面，光 popToIndex(0) 会停在电站/订单页。须清空页面栈再切回首页 tab。
+   */
+  private goHome(): void {
+    try {
+      this.pathStack.clear();
+    } catch (err) {
+      console.error(`clear nav stack failed: ${JSON.stringify(err)}`);
+    }
+    this.goTab(0);
+  }
+
   @Builder
   PageMap(name: string, param: object) {
     if (name === 'NearbyStations') {
@@ -60,11 +73,19 @@ struct Index {
       }.hideTitleBar(true)
     } else if (name === 'ChargeComplete') {
       NavDestination() {
-        ChargeCompletePage({ pathStack: this.pathStack, orderId: this.idOf(param) })
+        ChargeCompletePage({
+          pathStack: this.pathStack,
+          orderId: this.idOf(param),
+          onHomeTab: () => this.goHome()
+        })
       }.hideTitleBar(true)
     } else if (name === 'Bill') {
       NavDestination() {
-        BillPage({ pathStack: this.pathStack, orderId: this.idOf(param) })
+        BillPage({
+          pathStack: this.pathStack,
+          orderId: this.idOf(param),
+          onHomeTab: () => this.goHome()
+        })
       }.hideTitleBar(true)
     }
   }

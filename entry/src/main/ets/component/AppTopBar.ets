@@ -7,6 +7,9 @@ export struct AppTopBar {
   @Prop title: string = '';
   @Prop showBack: boolean = true;
   @Prop bordered: boolean = true;
+  /** 右上角可选文字操作（如订单页「刷新」）；留空则保持 24×24 占位以维持标题居中 */
+  @Prop trailingText: string = '';
+  onTrailing?: () => void;
   pathStack?: NavPathStack;
   onBack?: () => void;
 
@@ -35,7 +38,20 @@ export struct AppTopBar {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
         Blank()
-        Row().width(24).height(24)
+        if (this.trailingText === '') {
+          Row().width(24).height(24)
+        } else {
+          Text(this.trailingText)
+            .fontSize(14)
+            .fontColor($r('app.color.btn_primary'))
+            .constraintSize({ minWidth: 24 })
+            .textAlign(TextAlign.End)
+            .onClick(() => {
+              if (this.onTrailing) {
+                this.onTrailing();
+              }
+            })
+        }
       }
       .width('100%')
       .height(47)

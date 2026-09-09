@@ -3,7 +3,7 @@ import { OrderService } from '../service/OrderService';
 import { AppTopBar } from '../component/AppTopBar';
 
 /**
- * 订单列表（Story 14）：状态筛选 + 订单卡，数据来自 OrderService。
+ * 订单列表（Story 14）：状态筛选 + 订单卡，数据来自 OrderService；右上角「刷新」手动重拉。
  * 「查看详情」进入账单页（Story 15），「再来一单」回到附近电站。
  */
 
@@ -15,6 +15,7 @@ export struct OrderView {
 
   @State currentTab: number = 0;
   @State orders: ChargingOrder[] = [];
+  @State refreshing: boolean = false;
   @StorageProp('ordersVersion') @Watch('reload') ordersVersion: number = 0;
 
   private tabs: string[] = ['全部', '充电中', '已完成'];
@@ -29,6 +30,30 @@ export struct OrderView {
     }).catch(() => {
       // 网络/服务异常时保持旧数据
     });
+  }
+
+  /** 右上角手动刷新：listOrders 直连后端，失败保留旧数据并提示 */
+  private refresh(): void {
+    if (this.refreshing) {
+      return;
+    }
+    this.refreshing = true;
+    OrderService.getInstance().listOrders().then((list: ChargingOrder[]) => {
+      this.orders = list;
+      this.toast(`已刷新，共 ${list.length} 条订单`);
+    }).catch(() => {
+      this.toast('刷新失败，请检查网络');
+    }).finally(() => {
+      this.refreshing = false;
+    });
+  }
+
+  private toast(message: string): void {
+    try {
+      this.getUIContext().getPromptAction().showToast({ message: message, duration: 1500 });
+    } catch (err) {
+      console.error(`OrderView toast failed: ${JSON.stringify(err)}`);
+    }
   }
 
   private statusLabel(o: ChargingOrder): string {
@@ -205,7 +230,15 @@ export struct OrderView {
 
   build() {
     Column() {
-      AppTopBar({ title: '充电订单', pathStack: this.pathStack, showBack: !this.embedded })
+      AppTopBar({
+        title: '充电订单',
+        pathStack: this.pathStack,
+        showBack: !this.embedded,
+        trailingText: this.refreshing ? '刷新中…' : '刷新',
+        onTrailing: () => {
+          this.refresh();
+        }
+      })
       this.FilterBar()
 
       Scroll() {
