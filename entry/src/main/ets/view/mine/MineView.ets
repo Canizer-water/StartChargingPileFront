@@ -29,6 +29,34 @@ export struct MineView {
     return `${name.substring(0, 3)}****${name.substring(7)}`;
   }
 
+  /** 打开独立 @Entry 页（AI 车牌识别 / AI 助手，经全局 router） */
+  private goAi(url: string): void {
+    try {
+      this.getUIContext().getRouter().pushUrl({ url: url });
+    } catch (err) {
+      this.showToast('页面打开失败');
+    }
+  }
+
+  @Builder
+  AiMenuRow(label: string, url: string) {
+    Row() {
+      Text(label)
+        .fontSize(15)
+        .fontWeight(FontWeight.Medium)
+        .fontColor($r('app.color.profile_text_primary'))
+        .layoutWeight(1)
+      Text('›')
+        .fontSize(18)
+        .fontColor($r('app.color.text_secondary'))
+    }
+    .width('100%')
+    .height(56)
+    .padding({ left: 20, right: 18 })
+    .alignItems(VerticalAlign.Center)
+    .onClick(() => this.goAi(url))
+  }
+
   private handleLogout(): void {
     if (this.loggingOut) {
       return;
@@ -132,6 +160,9 @@ export struct MineView {
       this.GradientHeader()
 
       Column() {
+        this.AiMenuRow('AI 车牌识别', 'pages/LicensePlatePage')
+        this.AiMenuRow('AI 助手', 'pages/AiChatPage')
+        Divider().color($r('app.color.divider')).strokeWidth(1).margin({ left: 20, right: 16 })
         this.LogoutRow()
       }
       .width('100%')
