@@ -93,6 +93,9 @@ export struct PileDetailPage {
     if (this.pile && this.pile.status === 'CHARGING') {
       return '充电中';
     }
+    if (this.pile && this.pile.status === 'FAULT') {
+      return '故障';
+    }
     return '离线';
   }
 

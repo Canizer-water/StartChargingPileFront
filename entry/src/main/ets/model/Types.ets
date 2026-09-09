@@ -17,8 +17,15 @@ export interface UserAccount {
   createdAt: string;     // 注册时间 'YYYY-MM-DD HH:MM:SS'
 }
 
-/** 充电桩状态 */
-export type PileStatus = 'IDLE' | 'CHARGING' | 'OFFLINE';
+/** 车辆信息 —— 对齐后端 GET /vehicle/current 的 VehicleOut（契约 §5.7） */
+export interface Vehicle {
+  plateNo: string;       // 车牌号（无记录默认 ''）
+  battery: number;       // 电量 %（默认 75）
+  rangeKm: number;       // 续航 km（默认 260）
+}
+
+/** 充电桩状态（后端 PileOut.status；FAULT 桩不可启动/预估，仅展示） */
+export type PileStatus = 'IDLE' | 'CHARGING' | 'OFFLINE' | 'FAULT';
 
 /** 充电桩 */
 export interface ChargingPile {

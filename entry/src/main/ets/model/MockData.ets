@@ -35,6 +35,7 @@ const PILE_META: Record<string, PileDisplayMeta> = {
   'p000000004': { slotCode: 'C000000003', floor: '诺得充电中心1号一层', ground: '地上充电' },
   'p100000001': { slotCode: 'C200000001', floor: '天辰大厦一层', ground: '地上充电' },
   'p100000002': { slotCode: 'C200000002', floor: '天辰大厦一层', ground: '地上充电' },
+  'p100000003': { slotCode: 'C200000003', floor: '天辰大厦一层', ground: '地上充电' },
   'p300000001': { slotCode: 'C300000001', floor: '能源大厦B2层', ground: '地下充电' },
   'p300000002': { slotCode: 'C300000002', floor: '能源大厦B2层', ground: '地下充电' },
   'p400000001': { slotCode: 'C400000001', floor: '会展中心1号广场', ground: '地上充电' }

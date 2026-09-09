@@ -240,14 +240,14 @@ export struct StationDetailPage {
         Row() {
           SymbolGlyph($r('sys.symbol.bolt_fill'))
             .fontSize(14)
-            .fontColor([$r('app.color.btn_primary')])
-          Text('充电')
+            .fontColor([pile.status === 'IDLE' ? $r('app.color.btn_primary') : $r('app.color.text_secondary')])
+          Text(pile.status === 'IDLE' ? '充电' : '详情')
             .fontSize(14)
-            .fontColor($r('app.color.btn_primary'))
+            .fontColor(pile.status === 'IDLE' ? $r('app.color.btn_primary') : $r('app.color.text_secondary'))
             .margin({ left: 3 })
         }
         .padding({ left: 12, right: 12, top: 6, bottom: 6 })
-        .border({ width: 1, color: $r('app.color.btn_primary') })
+        .border({ width: 1, color: pile.status === 'IDLE' ? $r('app.color.btn_primary') : $r('app.color.divider') })
         .borderRadius(18)
         .onClick(() => this.goPile(pile.id))
       }
