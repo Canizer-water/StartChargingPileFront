@@ -149,28 +149,6 @@ export struct ChargingPage {
   }
 
   @Builder
-  DataItem(label: string, value: string, unit: string) {
-    Column({ space: 4 }) {
-      Text(label)
-        .fontSize(12)
-        .fontColor($r('app.color.text_secondary'))
-      Row() {
-        Text(value)
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.btn_primary'))
-        Text(unit)
-          .fontSize(12)
-          .fontColor($r('app.color.text_secondary'))
-          .margin({ left: 3, bottom: 3 })
-      }
-      .alignItems(VerticalAlign.Bottom)
-    }
-    .alignItems(HorizontalAlign.Center)
-    .layoutWeight(1)
-  }
-
-  @Builder
   StatusCard() {
     Column({ space: 20 }) {
       Stack() {
@@ -182,11 +160,11 @@ export struct ChargingPage {
           .style({ strokeWidth: 14 })
 
         Column({ space: 4 }) {
-          Text(`${Math.floor(this.progress())}%`)
+          Text(this.data.energyKwh.toFixed(2))
             .fontSize(40)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.btn_primary'))
-          Text('充电进度')
+          Text(`kWh · 充电进度 ${this.progress().toFixed(1)}%`)
             .fontSize(13)
             .fontColor($r('app.color.text_secondary'))
         }
@@ -205,17 +183,30 @@ export struct ChargingPage {
         .width('100%')
 
       Row() {
-        this.DataItem('已充电量', this.data.energyKwh.toFixed(2), 'kWh')
+        Column() {
+          MetricItem({ label: '已充电量', value: this.data.energyKwh.toFixed(2), unit: 'kWh' })
+        }
+        .layoutWeight(1)
+
         Column()
           .width(1)
           .height(32)
           .backgroundColor($r('app.color.divider'))
-        this.DataItem('充电时长', `${Math.floor(this.data.durationSec / 60)}`, 'min')
+
+        Column() {
+          MetricItem({ label: '充电时长', value: (this.data.durationSec / 60).toFixed(1), unit: 'min' })
+        }
+        .layoutWeight(1)
+
         Column()
           .width(1)
           .height(32)
           .backgroundColor($r('app.color.divider'))
-        this.DataItem('当前功率', this.data.powerKw.toFixed(1), 'kW')
+
+        Column() {
+          MetricItem({ label: '当前功率', value: this.data.powerKw.toFixed(1), unit: 'kW' })
+        }
+        .layoutWeight(1)
       }
       .width('100%')
     }
@@ -276,5 +267,37 @@ export struct ChargingPage {
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.app_bg'))
+  }
+}
+
+/**
+ * 三格实时数据单元。必须是 @Component 而非 @Builder：
+ * @Builder 的字符串参数按值传递，状态更新后不重渲染，实测三格会永远停在首帧的 0.00。
+ */
+@Component
+struct MetricItem {
+  @Prop label: string = '';
+  @Prop value: string = '';
+  @Prop unit: string = '';
+
+  build() {
+    Column({ space: 4 }) {
+      Text(this.label)
+        .fontSize(12)
+        .fontColor($r('app.color.text_secondary'))
+      Row() {
+        Text(this.value)
+          .fontSize(24)
+          .fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.btn_primary'))
+        Text(this.unit)
+          .fontSize(12)
+          .fontColor($r('app.color.text_secondary'))
+          .margin({ left: 3, bottom: 3 })
+      }
+      .alignItems(VerticalAlign.Bottom)
+    }
+    .alignItems(HorizontalAlign.Center)
+    .width('100%')
   }
 }

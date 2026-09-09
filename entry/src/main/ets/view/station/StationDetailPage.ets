@@ -222,6 +222,37 @@ export struct StationDetailPage {
     .margin({ top: 8 })
   }
 
+  /** 非空闲桩的提示文案 / 前景色 / 底色（仅在 status !== IDLE 时渲染） */
+  private unavailableHint(status: string): string {
+    if (status === 'CHARGING') {
+      return '占用中 · 正在为其他车辆充电，暂不可启动';
+    }
+    if (status === 'FAULT') {
+      return '故障停用 · 该桩已上报故障，请换一把枪';
+    }
+    return '离线 · 暂时连不上该桩，状态可能已变化';
+  }
+
+  private unavailableColor(status: string): ResourceColor {
+    if (status === 'CHARGING') {
+      return $r('app.color.price_orange');
+    }
+    if (status === 'FAULT') {
+      return $r('app.color.red');
+    }
+    return $r('app.color.text_secondary');
+  }
+
+  private unavailableBgColor(status: string): ResourceColor {
+    if (status === 'CHARGING') {
+      return $r('app.color.tag_orange_bg');
+    }
+    if (status === 'FAULT') {
+      return $r('app.color.tag_red_bg');
+    }
+    return $r('app.color.chip_bg');
+  }
+
   /** 单个充电桩卡片 */
   @Builder
   PileCard(pile: ChargingPile) {
@@ -253,6 +284,26 @@ export struct StationDetailPage {
       }
       .width('100%')
       .alignItems(VerticalAlign.Center)
+
+      // 非空闲桩在卡片上直接说明原因，避免点进三级页才知道不能用
+      if (pile.status !== 'IDLE') {
+        Row() {
+          SymbolGlyph($r('sys.symbol.exclamationmark_circle'))
+            .fontSize(15)
+            .fontColor([this.unavailableColor(pile.status)])
+          Text(this.unavailableHint(pile.status))
+            .fontSize(12)
+            .fontColor(this.unavailableColor(pile.status))
+            .margin({ left: 5 })
+            .layoutWeight(1)
+        }
+        .width('100%')
+        .padding({ left: 8, right: 8, top: 6, bottom: 6 })
+        .backgroundColor(this.unavailableBgColor(pile.status))
+        .borderRadius(6)
+        .margin({ top: 8 })
+        .alignItems(VerticalAlign.Center)
+      }
 
       Text(`停车位号：${pileMeta(pile.id).slotCode}`)
         .fontSize(13)

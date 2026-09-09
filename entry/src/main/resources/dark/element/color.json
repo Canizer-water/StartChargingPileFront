@@ -26,6 +26,8 @@
     { "name": "tag_blue_text", "value": "#6E9BE8" },
     { "name": "tag_green_bg", "value": "#163528" },
     { "name": "tag_green_text", "value": "#2EC480" },
+    { "name": "tag_orange_bg", "value": "#3A2A1C" },
+    { "name": "tag_red_bg", "value": "#3A1E21" },
     { "name": "btn_primary", "value": "#6E9BE8" },
     { "name": "primary_blue", "value": "#6E9BE8" },
     { "name": "primary_light", "value": "#8FB3F5" },
