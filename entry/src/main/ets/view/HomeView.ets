@@ -1,7 +1,7 @@
 import { ChargeStatusCard } from '../component/ChargeStatusCard';
 
 /**
- * 首页 tab（Story 4/5）：充电状态卡片 + 附近充电站快捷入口。
+ * 首页 tab（Story 4/5）：充电状态卡片 + 附近充电站快捷入口 + AI 助手入口。
  * 原「我的服务」宫格为超纲功能入口，本轮按 doc 功能点范围撤下。
  */
 
@@ -85,6 +85,71 @@ export struct HomeView {
       .margin({ top: 8, bottom: 12 })
   }
 
+  /** AI 助手入口：独立 @Entry 页，经 UIContext router 打开 */
+  @Builder
+  AiAssistantEntry() {
+    Column() {
+      Row() {
+        Row() {
+          SymbolGlyph($r('sys.symbol.message'))
+            .fontSize(22)
+            .fontColor([$r('app.color.btn_primary')])
+        }
+        .width(44)
+        .height(44)
+        .borderRadius(13)
+        .justifyContent(FlexAlign.Center)
+        .alignItems(VerticalAlign.Center)
+        .backgroundColor($r('app.color.chip_bg'))
+
+        Column() {
+          Text('AI 助手')
+            .fontSize(16)
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('app.color.text_primary'))
+          Text('充电疑问、费用与桩位随问随答')
+            .fontSize(12)
+            .fontColor($r('app.color.text_secondary'))
+            .margin({ top: 4 })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+        .margin({ left: 14 })
+
+        SymbolGlyph($r('sys.symbol.chevron_right'))
+          .fontSize(18)
+          .fontColor([$r('app.color.text_secondary')])
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16, top: 14, bottom: 14 })
+      .alignItems(VerticalAlign.Center)
+      .backgroundColor($r('app.color.app_card'))
+      .borderRadius(14)
+      .onClick(() => {
+        this.goPage('pages/AiChatPage');
+      })
+    }
+    .width('100%')
+    .margin({ top: 12 })
+  }
+
+  private goPage(url: string): void {
+    try {
+      this.getUIContext().getRouter().pushUrl({ url: url });
+    } catch (err) {
+      console.error(`open ${url} failed: ${JSON.stringify(err)}`);
+      this.showToast('页面打开失败');
+    }
+  }
+
+  private showToast(message: string): void {
+    try {
+      this.getUIContext().getPromptAction().showToast({ message: message, duration: 1500 });
+    } catch (err) {
+      console.error(`showToast failed: ${JSON.stringify(err)}`);
+    }
+  }
+
   build() {
     Column() {
       this.Header()
@@ -103,6 +168,7 @@ export struct HomeView {
 
           this.SectionTitle('快捷入口')
           this.NearbyBanner()
+          this.AiAssistantEntry()
         }
         .padding({ left: 16, right: 16, bottom: 24 })
       }

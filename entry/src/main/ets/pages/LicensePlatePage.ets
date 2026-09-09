@@ -53,6 +53,12 @@ struct LicensePlatePage {
     }
   }
 
+  /** 把识别结果交给准备充电页（AppStorage 一次性传值，接收方读完即清空） */
+  private usePlate(): void {
+    AppStorage.setOrCreate('recognizedPlate', this.result);
+    router.back();
+  }
+
   @Builder
   TitleBar() {
     Row() {
@@ -176,10 +182,24 @@ struct LicensePlatePage {
               })
           }
           .width('100%')
-          .margin({ top: 4, bottom: 24 })
+          .margin({ top: 4 })
+
+          if (this.result !== '' && !this.recognizing) {
+            Button('填入车牌号并返回')
+              .width('100%')
+              .height(48)
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+              .fontColor($r('app.color.login_primary'))
+              .backgroundColor(Color.White)
+              .border({ width: 1, color: $r('app.color.login_primary'), radius: 8 })
+              .onClick(() => {
+                this.usePlate();
+              })
+          }
         }
         .width('100%')
-        .padding({ left: 20, right: 20, top: 8 })
+        .padding({ left: 20, right: 20, top: 8, bottom: 24 })
       }
       .layoutWeight(1)
       .scrollBar(BarState.Off)

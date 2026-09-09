@@ -19,6 +19,8 @@ export struct PileDetailPage {
   @State pile: ChargingPile | undefined = undefined;
   @State plate: string = '';
   @State starting: boolean = false;
+  /** AI 车牌识别页回传的车牌号（读完即清空，避免重复回填） */
+  @StorageProp('recognizedPlate') @Watch('onRecognizedPlate') recognizedPlate: string = '';
   private dialogController: CustomDialogController | null = null;
 
   aboutToAppear(): void {
@@ -99,6 +101,25 @@ export struct PileDetailPage {
     return '离线';
   }
 
+  /** 打开 AI 车牌识别页；结果经 AppStorage 回传（onRecognizedPlate） */
+  private goPlateRecognize(): void {
+    try {
+      this.getUIContext().getRouter().pushUrl({ url: 'pages/LicensePlatePage' });
+    } catch (err) {
+      console.error(`open LicensePlatePage failed: ${JSON.stringify(err)}`);
+      this.showToast('打开车牌识别失败');
+    }
+  }
+
+  private onRecognizedPlate(): void {
+    if (this.recognizedPlate === '') {
+      return;
+    }
+    this.plate = this.recognizedPlate;
+    AppStorage.setOrCreate('recognizedPlate', '');
+    this.showToast('车牌号已填入，请核对');
+  }
+
   /** 车牌号 */
   @Builder
   PlateInput() {
@@ -115,7 +136,9 @@ export struct PileDetailPage {
           .fontSize(24)
           .fontColor([$r('app.color.primary_blue')])
           .margin({ left: 8 })
-          .onClick(() => this.showToast('选择车牌（演示）'))
+          .onClick(() => {
+            this.goPlateRecognize();
+          })
       }
       .width('100%')
       .alignItems(VerticalAlign.Center)
@@ -283,6 +306,24 @@ export struct PileDetailPage {
     .padding({ top: 24, bottom: 24 })
   }
 
+  /** 底部提示语：非空闲桩要说清为什么按钮是灰的 */
+  private bottomHint(): string {
+    const pile = this.pile;
+    if (pile === undefined) {
+      return '请先插枪后点击充电';
+    }
+    if (pile.status === 'CHARGING') {
+      return '该桩正在为其他车辆充电，暂不可启动';
+    }
+    if (pile.status === 'FAULT') {
+      return '该桩已上报故障，请换一把枪';
+    }
+    if (pile.status === 'OFFLINE') {
+      return '该桩离线，暂时无法启动';
+    }
+    return '请先插枪后点击充电';
+  }
+
   /** 底部操作栏 */
   @Builder
   BottomBar() {
@@ -290,10 +331,13 @@ export struct PileDetailPage {
       Text('提示：')
         .fontSize(13)
         .fontColor($r('app.color.price_orange'))
-      Text('请先插枪后点击充电')
+      Text(this.bottomHint())
         .fontSize(13)
         .fontColor($r('app.color.text_secondary'))
-      Blank()
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .layoutWeight(1)
+        .margin({ left: 4 })
       PrimaryButton({
         label: '立即充电',
         fullWidth: false,
