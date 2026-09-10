@@ -10,11 +10,17 @@ import { ScanView } from '../view/charging/ScanView';
 import { ChargingPage } from '../view/charging/ChargingPage';
 import { ChargeCompletePage } from '../view/charging/ChargeCompletePage';
 import { BillPage } from '../view/charging/BillPage';
+import { WalletView } from '../view/WalletView';
+import { RechargeView } from '../view/RechargeView';
+import { InvoiceView } from '../view/InvoiceView';
+import { MyVehiclesView } from '../view/MyVehiclesView';
+import { NotificationsView } from '../view/mine/NotificationsView';
 
 /**
  * 主框架（Story 3）：Navigation 宿主，NavBar 内容为底部 5 个 tab
  * （首页/充电/扫一扫/订单/我的），二级页面统一 NavDestination 注册。
- * 超纲页面（钱包/爱车/通知等）已从路由表撤下，文件保留待后续迭代。
+ * 钱包域（钱包/充值/发票/爱车/通知）为文档外增补，入口集中在「我的」；
+ * 其中爱车走真接口（GET /vehicle/current），钱包与通知为端侧模拟（无后端接口，契约未收录）。
  */
 
 @Component
@@ -87,6 +93,26 @@ struct Index {
           onHomeTab: () => this.goHome()
         })
       }.hideTitleBar(true)
+    } else if (name === 'Wallet') {
+      NavDestination() {
+        WalletView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'Recharge') {
+      NavDestination() {
+        RechargeView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'Invoice') {
+      NavDestination() {
+        InvoiceView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'MyVehicles') {
+      NavDestination() {
+        MyVehiclesView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
+    } else if (name === 'Notifications') {
+      NavDestination() {
+        NotificationsView({ pathStack: this.pathStack })
+      }.hideTitleBar(true)
     }
   }
 
@@ -130,7 +156,7 @@ struct Index {
         .tabBar(this.TabItem(3, '订单', $r('sys.symbol.doc_text')))
 
         TabContent() {
-          MineView()
+          MineView({ pathStack: this.pathStack })
         }
         .tabBar(this.TabItem(4, '我的', $r('sys.symbol.person')))
       }

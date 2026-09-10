@@ -1,5 +1,6 @@
 import { ChargingOrder, NavParam } from '../../model/Types';
 import { OrderService } from '../../service/OrderService';
+import { WalletService } from '../../service/WalletService';
 import { AppTopBar } from '../../component/AppTopBar';
 import { InfoRow } from '../../component/InfoRow';
 import { PrimaryButton } from '../../component/PrimaryButton';
@@ -27,6 +28,9 @@ export struct ChargeCompletePage {
         return;
       }
       this.order = order;
+      // 自动断电路径不经过 finishOrder，汇总页补一次对账（按订单号幂等，重复调用安全）
+      WalletService.getInstance().settleFinished([order]).catch(() => {
+      });
     }).catch(() => {
       this.toast('订单加载失败');
     });

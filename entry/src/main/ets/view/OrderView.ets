@@ -1,10 +1,13 @@
 import { ChargingOrder, NavParam } from '../model/Types';
 import { OrderService } from '../service/OrderService';
+import { WalletService } from '../service/WalletService';
 import { AppTopBar } from '../component/AppTopBar';
 
 /**
  * 订单列表（Story 14）：状态筛选 + 订单卡，数据来自 OrderService；右上角「刷新」手动重拉。
  * 「查看详情」进入账单页（Story 15），「再来一单」回到附近电站。
+ * 每次拉取顺带做一次钱包对账（settleFinished 按订单号幂等），补上自动断电等未走
+ * finishOrder 的结算单——端侧临时方案，后端补 wallet 域后移除。
  */
 
 @Component
@@ -27,8 +30,15 @@ export struct OrderView {
   private reload(): void {
     OrderService.getInstance().listOrders().then((list: ChargingOrder[]) => {
       this.orders = list;
+      this.settleWallet(list);
     }).catch(() => {
       // 网络/服务异常时保持旧数据
+    });
+  }
+
+  /** 钱包对账：扣掉列表中未结算过的已完成单；失败不影响列表展示 */
+  private settleWallet(list: ChargingOrder[]): void {
+    WalletService.getInstance().settleFinished(list).catch(() => {
     });
   }
 
@@ -40,6 +50,7 @@ export struct OrderView {
     this.refreshing = true;
     OrderService.getInstance().listOrders().then((list: ChargingOrder[]) => {
       this.orders = list;
+      this.settleWallet(list);
       this.toast(`已刷新，共 ${list.length} 条订单`);
     }).catch(() => {
       this.toast('刷新失败，请检查网络');

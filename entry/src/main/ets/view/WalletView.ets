@@ -1,16 +1,34 @@
+import { common } from '@kit.AbilityKit';
 import { NavParam } from '../model/Types';
 import { AppTopBar } from '../component/AppTopBar';
+import { WalletService } from '../service/WalletService';
 
 /**
  * 我的钱包：余额 + 充值入口 + 发票入口。
- * 余额用 AppStorage 共享（@StorageLink 自动创建默认值 0）。
+ * 余额落 preferences（WalletService），冷启动不丢；允许透支，负余额在余额卡上标「透支」。
+ * 端侧模拟域，无后端接口，充值/扣款均不调真实支付渠道。
  */
 
 @Component
 export struct WalletView {
   pathStack: NavPathStack = new NavPathStack();
 
-  @StorageLink('walletBalance') walletBalance: number = 0;
+  @State balance: number = 0;
+  @StorageProp('walletVersion') @Watch('loadBalance') walletVersion: number = 0;
+
+  aboutToAppear(): void {
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    WalletService.getInstance().init(ctx).then(() => this.loadBalance()).catch(() => {
+      this.loadBalance();
+    });
+  }
+
+  private loadBalance(): void {
+    WalletService.getInstance().getBalance().then((v: number) => {
+      this.balance = v;
+    }).catch(() => {
+    });
+  }
 
   private showToast(message: string): void {
     try {
@@ -33,12 +51,25 @@ export struct WalletView {
         .fontColor(Color.White)
         .opacity(0.92)
 
-      Text(this.walletBalance.toFixed(2))
-        .fontSize(40)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White)
-        .letterSpacing(1)
-        .margin({ top: 6 })
+      Row() {
+        Text(this.balance.toFixed(2))
+          .fontSize(40)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(Color.White)
+          .letterSpacing(1)
+
+        if (this.balance < 0) {
+          Text('透支')
+            .fontSize(11)
+            .fontColor(Color.White)
+            .backgroundColor('rgba(255,255,255,0.24)')
+            .padding({ left: 8, right: 8, top: 3, bottom: 3 })
+            .borderRadius(4)
+            .margin({ left: 10, bottom: 10 })
+        }
+      }
+      .alignItems(VerticalAlign.Bottom)
+      .margin({ top: 6 })
 
       Row() {
         Text('查看充值记录')
