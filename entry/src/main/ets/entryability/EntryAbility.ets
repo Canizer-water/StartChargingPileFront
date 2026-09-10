@@ -2,6 +2,8 @@ import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want 
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { AuthService } from '../service/AuthService';
+import { NoticeService } from '../service/NoticeService';
+import { WalletService } from '../service/WalletService';
 import { UserAccount } from '../model/Types';
 
 const DOMAIN = 0x0000;
@@ -32,8 +34,15 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    // 会话门禁：先恢复本地登录态（联调后：token 换 GET /auth/me），再决定进主框架还是登录页
-    AuthService.getInstance().init(this.context)
+    // 会话门禁：先恢复本地登录态（联调后：token 换 GET /auth/me），再决定进主框架还是登录页。
+    // 端侧模拟域（钱包余额/通知已读）的 preferences 与认证存储一并 await 完成——
+    // 若并行 fire-and-forget，首屏前的结算写余额会因 store 未就绪而静默丢弃。
+    const storesReady: Promise<void>[] = [
+      AuthService.getInstance().init(this.context),
+      WalletService.getInstance().init(this.context),
+      NoticeService.getInstance().init(this.context)
+    ];
+    Promise.all(storesReady)
       .then(async () => {
         const user: UserAccount | null = await AuthService.getInstance().restoreSession();
         if (user) {

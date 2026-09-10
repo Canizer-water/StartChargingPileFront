@@ -1,8 +1,11 @@
+import { common } from '@kit.AbilityKit';
 import { AppTopBar } from '../component/AppTopBar';
 import { PrimaryButton } from '../component/PrimaryButton';
+import { WalletService } from '../service/WalletService';
 
 /**
- * 充值：金额选择 + 自定义金额 + 支付方式，联调 AppStorage 余额。
+ * 充值：金额选择 + 自定义金额 + 支付方式。
+ * 余额落 preferences（WalletService），仅模拟入账——不调用任何真实支付渠道。
  */
 
 interface PayMethod {
@@ -14,15 +17,30 @@ interface PayMethod {
 export struct RechargeView {
   pathStack: NavPathStack = new NavPathStack();
 
-  @StorageLink('walletBalance') walletBalance: number = 0;
+  @State balance: number = 0;
   @State selectedAmount: number = 50;
   @State customAmount: string = '';
   @State selectedPay: number = 0;
+  @State submitting: boolean = false;
   private quickAmounts: number[] = [10, 50, 100, 200, 300, 500];
   private payMethods: PayMethod[] = [
     { icon: $r('sys.symbol.creditcard'), name: '微信支付' },
     { icon: $r('sys.symbol.wallet'), name: '支付宝' }
   ];
+
+  aboutToAppear(): void {
+    const ctx = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    WalletService.getInstance().init(ctx).then(() => this.loadBalance()).catch(() => {
+      this.loadBalance();
+    });
+  }
+
+  private loadBalance(): void {
+    WalletService.getInstance().getBalance().then((v: number) => {
+      this.balance = v;
+    }).catch(() => {
+    });
+  }
 
   private showToast(message: string): void {
     try {
@@ -46,7 +64,7 @@ export struct RechargeView {
         .fontSize(13)
         .fontColor(Color.White)
         .opacity(0.92)
-      Text(this.walletBalance.toFixed(2))
+      Text(this.balance.toFixed(2))
         .fontSize(40)
         .fontWeight(FontWeight.Bold)
         .fontColor(Color.White)
@@ -162,6 +180,23 @@ export struct RechargeView {
     .margin({ top: 14 })
   }
 
+  /** 模拟入账：只写本地余额，不涉及支付渠道；成功即返回上一页 */
+  private submit(): void {
+    const amount = this.currentAmount();
+    if (this.submitting) {
+      return;
+    }
+    this.submitting = true;
+    WalletService.getInstance().recharge(amount).then(() => {
+      this.showToast(`充值成功，已到账 ${amount} 元`);
+      this.pathStack.pop();
+    }).catch(() => {
+      this.showToast('充值失败，请重试');
+    }).finally(() => {
+      this.submitting = false;
+    });
+  }
+
   build() {
     Column() {
       AppTopBar({ title: '充值', pathStack: this.pathStack })
@@ -187,12 +222,8 @@ export struct RechargeView {
 
       Column() {
         PrimaryButton({
-          label: '立即充值 ' + this.currentAmount() + ' 元',
-          onTap: () => {
-            this.walletBalance = this.walletBalance + this.currentAmount();
-            this.showToast('充值成功，已到账 ' + this.currentAmount() + ' 元');
-            this.pathStack.pop();
-          }
+          label: `立即充值 ${this.currentAmount()} 元`,
+          onTap: () => this.submit()
         })
       }
       .width('100%')

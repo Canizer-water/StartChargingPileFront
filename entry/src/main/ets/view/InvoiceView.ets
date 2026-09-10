@@ -1,15 +1,29 @@
 import { AppTopBar } from '../component/AppTopBar';
 import { PrimaryButton } from '../component/PrimaryButton';
+import { OrderService } from '../service/OrderService';
+import { ChargingOrder } from '../model/Types';
 
 /**
- * 电子发票：勾选订单 + 抬头类型 + 邮箱提交。
+ * 电子发票：勾选已完成订单 + 抬头类型 + 邮箱提交。
+ * 订单列表来自后端 GET /orders（筛 FINISHED），站名/时间/金额均为真实结算值——
+ * 不在本页造演示数据，避免与订单域口径割裂。提交仅提示，不落库、不接真实开票渠道；
+ * 同一单重复开票不拦截（无后端标记位，属演示范围）。
  */
 
 interface InvoiceOrder {
+  orderId: string;
   station: string;
   time: string;
   amount: number;
   selected: boolean;
+}
+
+/** 后端时间 'YYYY-MM-DD HH:MM:SS' → 列表用 'MM-DD HH:mm' */
+function shortTime(full: string): string {
+  if (full.length < 16) {
+    return full;
+  }
+  return `${full.substring(5, 10)} ${full.substring(11, 16)}`;
 }
 
 @Component
@@ -20,10 +34,37 @@ export struct InvoiceView {
   @State titleInput: string = '';
   @State taxNoInput: string = '';
   @State emailInput: string = '';
-  @State orders: InvoiceOrder[] = [
-    { station: '东方明珠充电站 · 02号桩', time: '09-18 14:30', amount: 36.50, selected: true },
-    { station: '虹桥枢纽充电站 · 01号桩', time: '09-17 20:45', amount: 52.80, selected: false }
-  ];
+  @State orders: InvoiceOrder[] = [];
+  @State loading: boolean = true;
+
+  aboutToAppear(): void {
+    this.loadOrders();
+  }
+
+  /** 已完成订单 → 可开票列表（默认全选，合计即时反映勾选） */
+  private loadOrders(): void {
+    this.loading = true;
+    OrderService.getInstance().listOrders().then((list: ChargingOrder[]) => {
+      const items: InvoiceOrder[] = [];
+      for (const o of list) {
+        if (o.status !== 'FINISHED') {
+          continue;
+        }
+        items.push({
+          orderId: o.id,
+          station: `${o.stationName} · ${o.pileCode}`,
+          time: shortTime(o.endTime === '' ? o.startTime : o.endTime),
+          amount: o.amount,
+          selected: true
+        });
+      }
+      this.orders = items;
+      this.loading = false;
+    }).catch(() => {
+      this.loading = false;
+      this.showToast('订单加载失败，请检查网络');
+    });
+  }
 
   private showToast(message: string): void {
     try {
@@ -47,6 +88,7 @@ export struct InvoiceView {
     const next: InvoiceOrder[] = this.orders.slice();
     const item: InvoiceOrder = next[index];
     next[index] = {
+      orderId: item.orderId,
       station: item.station,
       time: item.time,
       amount: item.amount,
@@ -61,11 +103,15 @@ export struct InvoiceView {
       return;
     }
     if (this.titleInput.trim() === '') {
-      this.showToast('请填写发票抬头');
+      this.showToast(this.headType === 0 ? '请填写发票抬头' : '请填写企业名称');
       return;
     }
-    if (this.emailInput.trim() === '') {
-      this.showToast('请填写接收邮箱');
+    if (this.headType === 1 && this.taxNoInput.trim() === '') {
+      this.showToast('请填写纳税人识别号');
+      return;
+    }
+    if (!this.emailInput.includes('@')) {
+      this.showToast('请填写正确的接收邮箱');
       return;
     }
     this.showToast('开票申请已提交，电子发票将发送至邮箱');
@@ -87,45 +133,61 @@ export struct InvoiceView {
     Column() {
       this.SectionTitle('选择要开票的订单')
 
-      ForEach(this.orders, (item: InvoiceOrder, index: number) => {
-        Row() {
-          Stack() {
-            Circle()
-              .width(20)
-              .height(20)
-              .fill(item.selected ? $r('app.color.btn_primary') : $r('app.color.border'))
-            if (item.selected) {
-              SymbolGlyph($r('sys.symbol.checkmark'))
-                .fontSize(12)
-                .fontColor([Color.White])
+      if (this.loading) {
+        Text('正在加载订单…')
+          .fontSize(13)
+          .fontColor($r('app.color.text_secondary'))
+          .width('100%')
+          .padding({ top: 8, bottom: 8 })
+      } else if (this.orders.length === 0) {
+        Text('暂无已完成的充电订单可开票')
+          .fontSize(13)
+          .fontColor($r('app.color.text_secondary'))
+          .width('100%')
+          .padding({ top: 8, bottom: 8 })
+      } else {
+        ForEach(this.orders, (item: InvoiceOrder, index: number) => {
+          Row() {
+            Stack() {
+              Circle()
+                .width(20)
+                .height(20)
+                .fill(item.selected ? $r('app.color.btn_primary') : $r('app.color.border'))
+              if (item.selected) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize(12)
+                  .fontColor([Color.White])
+              }
             }
-          }
-          .width(20)
-          .height(20)
+            .width(20)
+            .height(20)
 
-          Column() {
-            Text(item.station)
+            Column() {
+              Text(item.station)
+                .fontSize(15)
+                .fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.text_primary'))
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+              Text(item.time)
+                .fontSize(12)
+                .fontColor($r('app.color.text_secondary'))
+                .margin({ top: 4 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+            .margin({ left: 12 })
+
+            Text(`${item.amount.toFixed(2)} 元`)
               .fontSize(15)
               .fontWeight(FontWeight.Medium)
               .fontColor($r('app.color.text_primary'))
-            Text(item.time)
-              .fontSize(12)
-              .fontColor($r('app.color.text_secondary'))
-              .margin({ top: 4 })
           }
-          .alignItems(HorizontalAlign.Start)
-          .layoutWeight(1)
-          .margin({ left: 12 })
-
-          Text(item.amount.toFixed(2) + ' 元')
-            .fontSize(15)
-            .fontWeight(FontWeight.Medium)
-            .fontColor($r('app.color.text_primary'))
-        }
-        .width('100%')
-        .height(64)
-        .onClick(() => this.toggle(index))
-      }, (item: InvoiceOrder) => item.station)
+          .width('100%')
+          .height(64)
+          .onClick(() => this.toggle(index))
+        }, (item: InvoiceOrder) => item.orderId)
+      }
     }
     .width('100%')
     .padding(16)
@@ -251,7 +313,7 @@ export struct InvoiceView {
           this.HeadTypeSection()
           this.EmailSection()
 
-          Text('本次开票合计：' + this.selectedTotal().toFixed(2) + ' 元')
+          Text(`本次开票合计：${this.selectedTotal().toFixed(2)} 元`)
             .fontSize(14)
             .fontColor($r('app.color.text_primary'))
             .width('100%')

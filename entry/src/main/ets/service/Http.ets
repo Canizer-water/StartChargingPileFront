@@ -53,6 +53,11 @@ export class Http {
     return Http.request(http.RequestMethod.POST, path, bodyJson, token);
   }
 
+  /** PUT；用于整资源更新端点（如 PUT /vehicle/current） */
+  static put(path: string, bodyJson: string = '', token: string = ''): Promise<HttpResult> {
+    return Http.request(http.RequestMethod.PUT, path, bodyJson, token);
+  }
+
   private static request(method: http.RequestMethod, path: string, bodyJson: string,
                          token: string): Promise<HttpResult> {
     const req = http.createHttp();

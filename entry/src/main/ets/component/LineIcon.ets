@@ -2,8 +2,12 @@
  * LineIcon：使用 Canvas 自绘的轻量线性图标。
  * 不依赖系统符号资源，支持任意颜色，可随容器等比缩放。
  *
+ * ⚠ 用法约束：内部 Canvas 是 width('100%').height('100%')，自身没有固有尺寸，
+ * 必须放进定宽定高的容器（如 Row().width(16).height(16)）再使用。
+ * 裸放进 Row 会索要整行宽度，导致同行 layoutWeight(1) 的文字被挤没、图标自身画得过大。
+ *
  * 可用 kind：
- * user / wallet / yuan / car / history / envelope /
+ * user / wallet / yuan / car / history / envelope / chat / sparkle /
  * chevronRight / back / exit / bolt
  */
 @Component

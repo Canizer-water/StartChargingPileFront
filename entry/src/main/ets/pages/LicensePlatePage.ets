@@ -3,12 +3,43 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { recognizeLicensePlate } from '../service/AiService';
 
+/**
+ * AI 车牌识别页（@Entry，经 router.pushUrl 打开）。
+ * 调用方用 params.target 区分回传通道：
+ *   'charge'（缺省）→ 写 AppStorage['recognizedPlate']，由准备充电页回填；
+ *   'vehicle'       → 写 AppStorage['vehiclePlatePick']，由「我的爱车」录入框接收。
+ * 两个通道分开是必要的：充电页与爱车页都用 @StorageProp + @Watch 监听，
+ * 若共用一个键，双方都会抢到并各自清空，先触发者吞掉结果。
+ */
+
+/** 页面入参（router.pushUrl 的 params） */
+interface PlatePageParams {
+  target?: string;
+}
+
 @Entry
 @Component
 struct LicensePlatePage {
   @State pickedImage: string = '';
   @State result: string = '';
   @State recognizing: boolean = false;
+  /** 回传目标：'charge' | 'vehicle' */
+  @State target: string = 'charge';
+
+  aboutToAppear(): void {
+    // 准备充电的入口不带 params，getParams() 返回 undefined——必须先判空再取字段
+    const raw: Object | undefined = router.getParams();
+    if (raw !== undefined && raw !== null) {
+      const params = raw as PlatePageParams;
+      if (params.target === 'vehicle') {
+        this.target = 'vehicle';
+      }
+    }
+  }
+
+  private isVehicleTarget(): boolean {
+    return this.target === 'vehicle';
+  }
 
   private showToast(message: string): void {
     try {
@@ -53,9 +84,10 @@ struct LicensePlatePage {
     }
   }
 
-  /** 把识别结果交给准备充电页（AppStorage 一次性传值，接收方读完即清空） */
+  /** 把识别结果交给调用方（AppStorage 一次性传值，接收方读完即清空） */
   private usePlate(): void {
-    AppStorage.setOrCreate('recognizedPlate', this.result);
+    const key: string = this.isVehicleTarget() ? 'vehiclePlatePick' : 'recognizedPlate';
+    AppStorage.setOrCreate(key, this.result);
     router.back();
   }
 

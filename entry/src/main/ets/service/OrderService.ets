@@ -1,6 +1,7 @@
 import { ChargingOrder, RealTimeChargingData } from '../model/Types';
 import { ApiError, Http, HttpResult } from './Http';
 import { AuthService } from './AuthService';
+import { WalletService } from './WalletService';
 
 /**
  * 订单服务（联调版，契约 §5.3/§5.4，orders 列表已按 v0.3 Envelope 分页）：全部端点走后端。
@@ -103,6 +104,10 @@ export class OrderService {
       const res: HttpResult = await Http.post(`/charging/${orderId}/stop`, '', await this.token());
       const order = Http.parse<ChargingOrder>(res);
       this.bumpOrdersVersion();
+      // 端侧钱包对账（临时件，见 WalletService 头注释）：按服务端结算金额扣款，允许透支。
+      // 金额只取 order.amount，端侧不参与计价。
+      WalletService.getInstance().settleFinished([order]).catch(() => {
+      });
       return { success: true, message: '充电已结束', order: order };
     } catch (err) {
       return { success: false, message: err instanceof ApiError ? err.message : '结束充电失败，请稍后重试' };
